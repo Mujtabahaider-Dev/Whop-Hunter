@@ -1,1357 +1,2035 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Whop Hunter — Filter Whop Content Rewards By Real Platform Rates</title>
-  <meta name="description" content="A lightweight Chrome extension that filters Whop Content Rewards by actual platform CPMs, payout thresholds, and budget. Free and open source." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #0b0c0e;
-      --bg-subtle: #111317;
-      --surface: #16181d;
-      --surface-hover: #1d2127;
-      --border: #23272f;
-      --border-focus: #3b4252;
-      --border-accent: rgba(124, 58, 237, 0.4);
-      --text: #f3f4f6;
-      --text-muted: #8b949e;
-      --text-faint: #4b5563;
-      --primary: #6d28d9;
-      --primary-hover: #7c3aed;
-      --accent: #a78bfa;
-      --green: #10b981;
-      --red: #f43f5e;
-      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 14px;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .container {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* Nav */
-    header.site-header {
-      border-bottom: 1px solid var(--border);
-      background: rgba(11, 12, 14, 0.8);
-      backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 56px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 14px;
-      letter-spacing: -0.01em;
-    }
-
-    .brand img {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-    }
-
-    .nav-items {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .nav-items a {
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 500;
-      transition: color 0.12s;
-    }
-
-    .nav-items a:hover {
-      color: var(--text);
-    }
-
-    .btn-small {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12.5px;
-      font-weight: 600;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      transition: all 0.15s;
-    }
-
-    .btn-small:hover {
-      background: var(--surface-hover);
-      border-color: var(--border-focus);
-    }
-
-    /* Hero */
-    .hero {
-      padding: 72px 0 48px;
-      text-align: left;
-    }
-
-    .hero-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      background: var(--surface);
-      padding: 4px 10px;
-      border-radius: 999px;
-      margin-bottom: 20px;
-    }
-
-    .hero-tag span.dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-    }
-
-    h1 {
-      font-size: clamp(32px, 4.5vw, 48px);
-      font-weight: 700;
-      line-height: 1.18;
-      letter-spacing: -0.03em;
-      color: #ffffff;
-      max-width: 820px;
-      margin-bottom: 16px;
-    }
-
-    .hero-desc {
-      font-size: 16px;
-      color: var(--text-muted);
-      line-height: 1.6;
-      max-width: 680px;
-      margin-bottom: 28px;
-    }
-
-    .hero-cta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border-radius: 8px;
-      background: var(--primary);
-      color: #ffffff;
-      font-size: 13.5px;
-      font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      transition: all 0.15s;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-outline {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 13.5px;
-      font-weight: 500;
-      transition: all 0.15s;
-    }
-
-    .btn-outline:hover {
-      background: var(--surface-hover);
-      border-color: var(--border-focus);
-    }
-
-    /* Product UI Frame */
-    .app-frame {
-      margin: 40px 0 80px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--bg-subtle);
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    }
-
-    .app-topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 38px;
-      padding: 0 14px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      font-size: 12px;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-    }
-
-    .window-controls {
-      display: flex;
-      gap: 6px;
-    }
-
-    .window-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--border);
-    }
-
-    .app-workspace {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      min-height: 440px;
-    }
-
-    @media (max-width: 820px) {
-      .app-workspace {
-        grid-template-columns: 1fr;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Whop Hunter — Filter Whop Content Rewards By Real Platform Rates
+    </title>
+    <meta
+      name="description"
+      content="A lightweight Chrome extension that filters Whop Content Rewards by actual platform CPMs, payout thresholds, and budget. Free and open source."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b0c0e;
+        --bg-subtle: #111317;
+        --surface: #16181d;
+        --surface-hover: #1d2127;
+        --border: #23272f;
+        --border-focus: #3b4252;
+        --border-accent: rgba(124, 58, 237, 0.4);
+        --text: #f3f4f6;
+        --text-muted: #8b949e;
+        --text-faint: #4b5563;
+        --primary: #6d28d9;
+        --primary-hover: #7c3aed;
+        --accent: #a78bfa;
+        --green: #10b981;
+        --red: #f43f5e;
+        --font-mono:
+          ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
       }
-    }
 
-    .app-table-area {
-      padding: 20px;
-      background: var(--bg);
-      border-right: 1px solid var(--border);
-      overflow-x: auto;
-    }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    .app-table-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
 
-    table.whop-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
 
-    table.whop-table th {
-      text-align: left;
-      padding: 8px 10px;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--text-faint);
-      border-bottom: 1px solid var(--border);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
+      .container {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
 
-    table.whop-table td {
-      padding: 12px 10px;
-      border-bottom: 1px solid #16181f;
-      color: var(--text);
-    }
+      /* Nav */
+      header.site-header {
+        border-bottom: 1px solid var(--border);
+        background: rgba(11, 12, 14, 0.8);
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
 
-    table.whop-table tr.hidden-row {
-      opacity: 0.25;
-      text-decoration: line-through;
-    }
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 56px;
+      }
 
-    .badge-match {
-      display: inline-block;
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: -0.01em;
+      }
 
-    .badge-cpm {
-      font-family: var(--font-mono);
-      font-weight: 600;
-      font-size: 12.5px;
-    }
+      .brand img {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+      }
 
-    /* Extension Drawer Inside Frame */
-    .app-drawer-side {
-      background: var(--surface);
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+      .nav-items {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
 
-    .drawer-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
+      .nav-items a {
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        transition: color 0.12s;
+      }
 
-    .drawer-head-title {
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
+      .nav-items a:hover {
+        color: var(--text);
+      }
 
-    .control-block {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-    }
+      .btn-small {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12.5px;
+        font-weight: 600;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        transition: all 0.15s;
+      }
 
-    .control-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      margin-bottom: 6px;
-      font-weight: 500;
-    }
+      .btn-small:hover {
+        background: var(--surface-hover);
+        border-color: var(--border-focus);
+      }
 
-    .control-row span { color: var(--text-muted); }
-    .control-row b { font-family: var(--font-mono); color: var(--accent); }
+      /* Hero */
+      .hero {
+        padding: 72px 0 48px;
+        text-align: left;
+      }
 
-    .native-range {
-      width: 100%;
-      accent-color: var(--primary);
-    }
+      .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        padding: 4px 10px;
+        border-radius: 999px;
+        margin-bottom: 20px;
+      }
 
-    /* Problem / Metrics Comparison */
-    .section-divider {
-      border-top: 1px solid var(--border);
-      padding: 72px 0;
-    }
+      .hero-tag span.dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+      }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-    }
+      h1 {
+        font-size: clamp(32px, 4.5vw, 48px);
+        font-weight: 700;
+        line-height: 1.18;
+        letter-spacing: -0.03em;
+        color: #ffffff;
+        max-width: 820px;
+        margin-bottom: 16px;
+      }
 
-    @media (max-width: 768px) {
-      .grid-2 { grid-template-columns: 1fr; }
-    }
+      .hero-desc {
+        font-size: 16px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        max-width: 680px;
+        margin-bottom: 28px;
+      }
 
-    .metric-card {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--surface);
-      padding: 24px;
-    }
+      .hero-cta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
 
-    .metric-card.highlight {
-      border-color: var(--border-accent);
-      background: linear-gradient(180deg, rgba(109, 40, 217, 0.08) 0%, var(--surface) 100%);
-    }
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        background: var(--primary);
+        color: #ffffff;
+        font-size: 13.5px;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        transition: all 0.15s;
+      }
 
-    .metric-title {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
 
-    .metric-value {
-      font-size: 32px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-    }
+      .btn-outline {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 13.5px;
+        font-weight: 500;
+        transition: all 0.15s;
+      }
 
-    .metric-sub {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
+      .btn-outline:hover {
+        background: var(--surface-hover);
+        border-color: var(--border-focus);
+      }
 
-    /* Technical Features Grid */
-    .specs-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 32px;
-    }
+      /* Product UI Frame */
+      .app-frame {
+        margin: 40px 0 80px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg-subtle);
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      }
 
-    @media (max-width: 768px) {
-      .specs-grid { grid-template-columns: 1fr; }
-    }
+      .app-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 38px;
+        padding: 0 14px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--text-muted);
+        font-family: var(--font-mono);
+      }
 
-    .spec-item {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface);
-      padding: 20px;
-    }
+      .window-controls {
+        display: flex;
+        gap: 6px;
+      }
 
-    .spec-item h3 {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: #ffffff;
-    }
+      .window-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--border);
+      }
 
-    .spec-item p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
+      .app-workspace {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        min-height: 440px;
+      }
 
-    /* Calculator Section */
-    .calc-box {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      padding: 28px;
-      display: grid;
-      grid-template-columns: 1fr 280px;
-      gap: 28px;
-      align-items: center;
-      margin-top: 24px;
-    }
+      @media (max-width: 820px) {
+        .app-workspace {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    @media (max-width: 768px) {
-      .calc-box { grid-template-columns: 1fr; }
-    }
+      .app-table-area {
+        padding: 20px;
+        background: var(--bg);
+        border-right: 1px solid var(--border);
+        overflow-x: auto;
+      }
 
-    .calc-output {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--bg);
-      padding: 20px;
-      text-align: center;
-    }
+      .app-table-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
 
-    .calc-output-title {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
+      table.whop-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
 
-    .calc-output-val {
-      font-size: 34px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      color: #34d399;
-      margin: 8px 0 4px;
-    }
+      table.whop-table th {
+        text-align: left;
+        padding: 8px 10px;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--text-faint);
+        border-bottom: 1px solid var(--border);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
 
-    /* Setup / Code snippet */
-    .code-block {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 18px;
-      font-family: var(--font-mono);
-      font-size: 12.5px;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      overflow-x: auto;
-    }
+      table.whop-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #16181f;
+        color: var(--text);
+      }
 
-    /* FAQ List */
-    .faq-list {
-      margin-top: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+      table.whop-table tr.hidden-row {
+        opacity: 0.25;
+        text-decoration: line-through;
+      }
 
-    details.faq-entry {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface);
-      padding: 14px 16px;
-      cursor: pointer;
-    }
+      .badge-match {
+        display: inline-block;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
 
-    details.faq-entry summary {
-      font-weight: 600;
-      font-size: 14px;
-      outline: none;
-      list-style: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+      .badge-cpm {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 12.5px;
+      }
 
-    details.faq-entry summary::-webkit-details-marker {
-      display: none;
-    }
+      /* Extension Drawer Inside Frame */
+      .app-drawer-side {
+        background: var(--surface);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
 
-    details.faq-entry summary::after {
-      content: "+";
-      color: var(--text-muted);
-      font-size: 16px;
-      font-weight: 400;
-    }
+      .drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+      }
 
-    details[open].faq-entry summary::after {
-      content: "−";
-    }
+      .drawer-head-title {
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
 
-    details.faq-entry p {
-      margin-top: 10px;
-      font-size: 13.5px;
-      color: var(--text-muted);
-      line-height: 1.55;
-    }
+      .control-block {
+        background: var(--bg-subtle);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+      }
 
-    /* Footer */
-    footer.site-footer {
-      border-top: 1px solid var(--border);
-      padding: 40px 0;
-      color: var(--text-faint);
-      font-size: 13px;
-      margin-top: 60px;
-    }
+      .control-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
 
-    .footer-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-  
-    /* Browser Tabs in Installation */
-    .browser-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
-      overflow-x: auto;
-    }
+      .control-row span {
+        color: var(--text-muted);
+      }
+      .control-row b {
+        font-family: var(--font-mono);
+        color: var(--accent);
+      }
 
-    .browser-tab-btn {
-      all: unset;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-      border: 1px solid transparent;
-      background: transparent;
-      transition: all 0.15s;
-    }
+      .native-range {
+        width: 100%;
+        accent-color: var(--primary);
+      }
 
-    .browser-tab-btn:hover {
-      color: var(--text);
-      background: var(--surface);
-    }
+      /* Problem / Metrics Comparison */
+      .section-divider {
+        border-top: 1px solid var(--border);
+        padding: 72px 0;
+      }
 
-    .browser-tab-btn.active {
-      color: #ffffff;
-      background: var(--surface);
-      border-color: var(--border-focus);
-      font-weight: 600;
-    }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
 
-    .browser-tab-btn svg {
-      flex: none;
-    }
+      @media (max-width: 768px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    .install-steps-flow {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
+      .metric-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        padding: 24px;
+      }
 
-    @media (max-width: 820px) {
-      .install-steps-flow { grid-template-columns: 1fr; }
-    }
+      .metric-card.highlight {
+        border-color: var(--border-accent);
+        background: linear-gradient(
+          180deg,
+          rgba(109, 40, 217, 0.08) 0%,
+          var(--surface) 100%
+        );
+      }
 
-    .install-step-box {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--surface);
-      padding: 22px;
-      position: relative;
-    }
+      .metric-title {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
 
-    .step-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      background: var(--primary);
-      color: #ffffff;
-      font-size: 12px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      margin-bottom: 14px;
-    }
+      .metric-value {
+        font-size: 32px;
+        font-weight: 700;
+        font-family: var(--font-mono);
+        letter-spacing: -0.02em;
+        margin-bottom: 6px;
+      }
 
-    .install-step-box h4 {
-      font-size: 14.5px;
-      font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
+      .metric-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
 
-    .install-step-box p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 14px;
-    }
+      /* Technical Features Grid */
+      .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 32px;
+      }
 
-    .inline-code-box {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+      @media (max-width: 768px) {
+        .specs-grid {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    .url-chip {
-      font-family: var(--font-mono);
-      color: var(--accent);
-      background: var(--bg);
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      font-size: 11.5px;
-    }
+      .spec-item {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 20px;
+      }
 
-  </style>
-</head>
-<body>
+      .spec-item h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #ffffff;
+      }
 
-  <!-- Top Navbar -->
-  <header class="site-header">
-    <div class="container">
-      <nav>
-        <a href="#" class="brand">
-          <img src="icons/icon128.png" alt="Whop Hunter" />
-          <span>Whop Hunter</span>
-        </a>
-        <div class="nav-items">
-          <a href="#how-it-works">How it works</a>
-          <a href="#calculator">Payout Calculator</a>
-          <a href="#installation">Installation</a>
-          <a href="#faq">FAQ</a>
-          <a href="https://github.com/Mujtabahaider-Dev/Whop-Hunter" target="_blank" class="btn-small">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-            GitHub
+      .spec-item p {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      /* Calculator Section */
+      .calc-box {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        padding: 28px;
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 28px;
+        align-items: center;
+        margin-top: 24px;
+      }
+
+      @media (max-width: 768px) {
+        .calc-box {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .calc-output {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg);
+        padding: 20px;
+        text-align: center;
+      }
+
+      .calc-output-title {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .calc-output-val {
+        font-size: 34px;
+        font-weight: 700;
+        font-family: var(--font-mono);
+        color: #34d399;
+        margin: 8px 0 4px;
+      }
+
+      /* Setup / Code snippet */
+      .code-block {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow-x: auto;
+      }
+
+      /* FAQ List */
+      .faq-list {
+        margin-top: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      details.faq-entry {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 14px 16px;
+        cursor: pointer;
+      }
+
+      details.faq-entry summary {
+        font-weight: 600;
+        font-size: 14px;
+        outline: none;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      details.faq-entry summary::-webkit-details-marker {
+        display: none;
+      }
+
+      details.faq-entry summary::after {
+        content: "+";
+        color: var(--text-muted);
+        font-size: 16px;
+        font-weight: 400;
+      }
+
+      details[open].faq-entry summary::after {
+        content: "−";
+      }
+
+      details.faq-entry p {
+        margin-top: 10px;
+        font-size: 13.5px;
+        color: var(--text-muted);
+        line-height: 1.55;
+      }
+
+      /* Footer */
+      footer.site-footer {
+        border-top: 1px solid var(--border);
+        padding: 40px 0;
+        color: var(--text-faint);
+        font-size: 13px;
+        margin-top: 60px;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      /* Browser Tabs in Installation */
+      .browser-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 12px;
+        overflow-x: auto;
+      }
+
+      .browser-tab-btn {
+        all: unset;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-muted);
+        border: 1px solid transparent;
+        background: transparent;
+        transition: all 0.15s;
+      }
+
+      .browser-tab-btn:hover {
+        color: var(--text);
+        background: var(--surface);
+      }
+
+      .browser-tab-btn.active {
+        color: #ffffff;
+        background: var(--surface);
+        border-color: var(--border-focus);
+        font-weight: 600;
+      }
+
+      .browser-tab-btn svg {
+        flex: none;
+      }
+
+      .install-steps-flow {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      @media (max-width: 820px) {
+        .install-steps-flow {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .install-step-box {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        padding: 22px;
+        position: relative;
+      }
+
+      .step-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        background: var(--primary);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: var(--font-mono);
+        margin-bottom: 14px;
+      }
+
+      .install-step-box h4 {
+        font-size: 14.5px;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 8px;
+      }
+
+      .install-step-box p {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin-bottom: 14px;
+      }
+
+      .inline-code-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .url-chip {
+        font-family: var(--font-mono);
+        color: var(--accent);
+        background: var(--bg);
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        font-size: 11.5px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Navbar -->
+    <header class="site-header">
+      <div class="container">
+        <nav>
+          <a href="#" class="brand">
+            <img src="icons/icon128.png" alt="Whop Hunter" />
+            <span>Whop Hunter</span>
+          </a>
+          <div class="nav-items">
+            <a href="#how-it-works">How it works</a>
+            <a href="#calculator">Payout Calculator</a>
+            <a href="#installation">Installation</a>
+            <a href="#faq">FAQ</a>
+            <a
+              href="https://github.com/Mujtabahaider-Dev/Whop-Hunter"
+              target="_blank"
+              class="btn-small"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+                />
+              </svg>
+              GitHub
+            </a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-tag">
+          <span class="dot"></span>
+          v1.0.5 · Free & Open Source Chrome Extension
+        </div>
+        <h1>Filter Whop clipping campaigns by the rates that actually pay.</h1>
+        <p class="hero-desc">
+          Whop shows a single generic CPM on the card, but TikTok, YouTube, and
+          Instagram pay completely different rates with hidden view minimums.
+          Whop Hunter inspects the raw campaign payloads and strips out any card
+          that doesn't meet your criteria.
+        </p>
+        <div class="hero-cta">
+          <a
+            href="https://github.com/Mujtabahaider-Dev/Whop-Hunter/archive/refs/heads/main.zip"
+            class="btn-primary"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download Extension (.zip)
+          </a>
+          <a href="#installation" class="btn-outline"> Installation Guide </a>
+        </div>
+      </section>
+
+      <!-- Real Product Interface Preview -->
+      <section class="app-frame" id="how-it-works">
+        <div class="app-topbar">
+          <div class="window-controls">
+            <span class="window-dot"></span>
+            <span class="window-dot"></span>
+            <span class="window-dot"></span>
+          </div>
+          <div>whop.com/discover/content-rewards</div>
+          <div style="color: var(--accent); font-weight: 600">
+            Whop Hunter Hook: Active
+          </div>
+        </div>
+        <div class="app-workspace">
+          <!-- Live Table View -->
+          <div class="app-table-area">
+            <div class="app-table-title">
+              <span>Campaign Discover Feed (Live Simulation)</span>
+              <span
+                id="matchStats"
+                style="font-family: var(--font-mono); color: var(--accent)"
+                >500 campaigns → 3 matches</span
+              >
+            </div>
+            <table class="whop-table">
+              <thead>
+                <tr>
+                  <th>Campaign</th>
+                  <th>TikTok CPM</th>
+                  <th>Pool Remaining</th>
+                  <th>Clippers</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="demoTableBody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Filter Drawer Side -->
+          <div class="app-drawer-side">
+            <div class="drawer-head">
+              <span class="drawer-head-title">
+                <img
+                  src="icons/icon128.png"
+                  style="width: 18px; height: 18px; border-radius: 4px"
+                  alt=""
+                />
+                Filters
+              </span>
+              <span
+                style="
+                  font-size: 11px;
+                  padding: 2px 6px;
+                  border-radius: 4px;
+                  background: var(--border);
+                  color: var(--text-muted);
+                  font-family: var(--font-mono);
+                "
+                >NO LOGIN</span
+              >
+            </div>
+
+            <div class="control-block">
+              <div class="control-row">
+                <span>Min TikTok CPM</span>
+                <b id="cpmThresholdLabel">$2.00 / 1k</b>
+              </div>
+              <input
+                type="range"
+                class="native-range"
+                id="filterCpmSlider"
+                min="0.50"
+                max="4.00"
+                step="0.25"
+                value="2.00"
+                oninput="runTableFilter()"
+              />
+            </div>
+
+            <div class="control-block">
+              <div class="control-row">
+                <span>Max Clippers</span>
+                <b id="clipperThresholdLabel">50 clippers</b>
+              </div>
+              <input
+                type="range"
+                class="native-range"
+                id="filterClippersSlider"
+                min="10"
+                max="200"
+                step="10"
+                value="50"
+                oninput="runTableFilter()"
+              />
+            </div>
+
+            <div class="control-block">
+              <div class="control-row">
+                <span>Min Remaining Budget</span>
+                <b id="budgetThresholdLabel">$1,000</b>
+              </div>
+              <input
+                type="range"
+                class="native-range"
+                id="filterBudgetSlider"
+                min="100"
+                max="5000"
+                step="200"
+                value="1000"
+                oninput="runTableFilter()"
+              />
+            </div>
+
+            <button
+              type="button"
+              class="btn-primary"
+              style="
+                justify-content: center;
+                width: 100%;
+                font-size: 12.5px;
+                padding: 8px 0;
+              "
+              onclick="runTableFilter()"
+            >
+              Apply Filter Engine
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Speed & Architecture Benchmark -->
+      <section class="section-divider" id="benchmark-section">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+          "
+        >
+          <div>
+            <div
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--accent);
+                margin-bottom: 4px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+              "
+            >
+              <span
+                style="
+                  display: inline-block;
+                  width: 6px;
+                  height: 6px;
+                  border-radius: 50%;
+                  background: var(--green);
+                "
+              ></span>
+              Live Performance Benchmark
+            </div>
+            <h2
+              style="
+                font-size: 24px;
+                font-weight: 700;
+                letter-spacing: -0.02em;
+                margin-bottom: 6px;
+              "
+            >
+              500 Campaigns: Manual vs. Whop Hunter
+            </h2>
+            <p style="color: var(--text-muted); font-size: 14px">
+              Watch real-time DOM processing vs manual click-through times on
+              500 creator reward cards.
+            </p>
+          </div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              flex-wrap: wrap;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 2px;
+              "
+            >
+              <button
+                type="button"
+                id="speedModeFast"
+                onclick="setBenchmarkSpeed('fast')"
+                style="
+                  all: unset;
+                  cursor: pointer;
+                  padding: 5px 10px;
+                  font-size: 11.5px;
+                  font-weight: 600;
+                  border-radius: 4px;
+                  background: var(--border-focus);
+                  color: #fff;
+                  transition: all 0.15s;
+                "
+              >
+                Fast Demo (4s)
+              </button>
+              <button
+                type="button"
+                id="speedModeReal"
+                onclick="setBenchmarkSpeed('real')"
+                style="
+                  all: unset;
+                  cursor: pointer;
+                  padding: 5px 10px;
+                  font-size: 11.5px;
+                  font-weight: 500;
+                  border-radius: 4px;
+                  color: var(--text-muted);
+                  transition: all 0.15s;
+                "
+              >
+                Realtime (20s)
+              </button>
+            </div>
+            <button
+              type="button"
+              id="benchmarkStartBtn"
+              onclick="triggerBenchmark()"
+              class="btn-primary"
+              style="padding: 7px 16px; font-size: 12.5px"
+            >
+              <svg
+                id="benchmarkBtnIcon"
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              <span id="benchmarkBtnLabel">Start Benchmark</span>
+            </button>
+            <button
+              type="button"
+              onclick="resetBenchmark()"
+              class="btn-outline"
+              style="padding: 7px 12px; font-size: 12.5px"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Manual Review Card -->
+          <div
+            class="metric-card"
+            style="
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+            "
+          >
+            <div>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 12px;
+                "
+              >
+                <div class="metric-title" style="margin-bottom: 0">
+                  MANUAL REVIEW (WITHOUT EXTENSION)
+                </div>
+                <span
+                  style="
+                    font-size: 11px;
+                    padding: 2px 7px;
+                    border-radius: 4px;
+                    background: rgba(244, 63, 94, 0.12);
+                    color: #f43f5e;
+                    border: 1px solid rgba(244, 63, 94, 0.25);
+                    font-family: var(--font-mono);
+                    font-weight: 600;
+                  "
+                  >BY HAND</span
+                >
+              </div>
+
+              <div style="display: flex; align-items: baseline; gap: 12px">
+                <div
+                  class="metric-value"
+                  id="manualTimer"
+                  style="color: var(--red); font-variant-numeric: tabular-nums"
+                >
+                  00:00:00
+                </div>
+                <span
+                  id="manualTargetTotal"
+                  style="
+                    font-size: 13px;
+                    font-family: var(--font-mono);
+                    color: var(--text-muted);
+                  "
+                  >Goal: ~2h 05m</span
+                >
+              </div>
+
+              <!-- Progress Bar -->
+              <div
+                style="
+                  background: var(--bg-subtle);
+                  border: 1px solid var(--border);
+                  border-radius: 999px;
+                  height: 7px;
+                  overflow: hidden;
+                  margin: 10px 0 12px;
+                "
+              >
+                <div
+                  id="manualProgressBar"
+                  style="
+                    width: 0%;
+                    height: 100%;
+                    background: #f43f5e;
+                    border-radius: 999px;
+                    transition: width 0.08s linear;
+                  "
+                ></div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  font-size: 12px;
+                  margin-bottom: 12px;
+                "
+              >
+                <span style="color: var(--text-muted)"
+                  >Reviewed:
+                  <b
+                    id="manualCardsDone"
+                    style="font-family: var(--font-mono); color: var(--text)"
+                    >0 / 500 cards</b
+                  ></span
+                >
+                <span
+                  id="manualTimeRemaining"
+                  style="font-family: var(--font-mono); color: #f43f5e"
+                  >~2h 05m to go</span
+                >
+              </div>
+
+              <p class="metric-sub">
+                Opening 500 cards individually, digging for specific platform
+                payout rates, calculating thresholds, and navigating back.
+              </p>
+            </div>
+
+            <!-- Activity Log Feed -->
+            <div
+              id="manualLogBox"
+              style="
+                margin-top: 18px;
+                padding: 10px 12px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                font-family: var(--font-mono);
+                font-size: 11.5px;
+                color: var(--text-muted);
+                min-height: 38px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              "
+            >
+              <span style="color: var(--text-faint)">●</span>
+              <span id="manualLogText"
+                >Idle · Click 'Start Benchmark' to begin test</span
+              >
+            </div>
+          </div>
+
+          <!-- Whop Hunter Automated Card -->
+          <div
+            class="metric-card highlight"
+            style="
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+            "
+          >
+            <div>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 12px;
+                "
+              >
+                <div class="metric-title" style="margin-bottom: 0">
+                  WITH WHOP HUNTER
+                </div>
+                <span
+                  style="
+                    font-size: 11px;
+                    padding: 2px 7px;
+                    border-radius: 4px;
+                    background: rgba(16, 185, 129, 0.15);
+                    color: #34d399;
+                    border: 1px solid rgba(16, 185, 129, 0.3);
+                    font-family: var(--font-mono);
+                    font-weight: 600;
+                  "
+                  >IN-MEMORY DOM ENGINE</span
+                >
+              </div>
+
+              <div style="display: flex; align-items: baseline; gap: 12px">
+                <div
+                  class="metric-value"
+                  id="hunterTimer"
+                  style="
+                    color: var(--green);
+                    font-variant-numeric: tabular-nums;
+                  "
+                >
+                  00:00:00
+                </div>
+                <span
+                  id="hunterTargetTotal"
+                  style="
+                    font-size: 13px;
+                    font-family: var(--font-mono);
+                    color: #34d399;
+                  "
+                  >Cap: 00:00:20 (20s)</span
+                >
+              </div>
+
+              <!-- Progress Bar -->
+              <div
+                style="
+                  background: var(--bg-subtle);
+                  border: 1px solid var(--border);
+                  border-radius: 999px;
+                  height: 7px;
+                  overflow: hidden;
+                  margin: 10px 0 12px;
+                "
+              >
+                <div
+                  id="hunterProgressBar"
+                  style="
+                    width: 0%;
+                    height: 100%;
+                    background: linear-gradient(90deg, #10b981, #34d399);
+                    border-radius: 999px;
+                    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+                    transition: width 0.08s linear;
+                  "
+                ></div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  font-size: 12px;
+                  margin-bottom: 12px;
+                "
+              >
+                <span style="color: var(--text-muted)"
+                  >Scanned:
+                  <b
+                    id="hunterCardsDone"
+                    style="font-family: var(--font-mono); color: #34d399"
+                    >0 / 500 cards</b
+                  ></span
+                >
+                <span
+                  id="hunterSpeedup"
+                  style="font-family: var(--font-mono); color: var(--accent)"
+                  >375x faster</span
+                >
+              </div>
+
+              <p class="metric-sub">
+                Inspects raw network chunks in memory and removes all
+                non-qualifying campaign cards directly from the DOM.
+              </p>
+            </div>
+
+            <!-- Activity Log Feed -->
+            <div
+              id="hunterLogBox"
+              style="
+                margin-top: 18px;
+                padding: 10px 12px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                font-family: var(--font-mono);
+                font-size: 11.5px;
+                color: var(--text-muted);
+                min-height: 38px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              "
+            >
+              <span style="color: var(--green)">●</span>
+              <span id="hunterLogText"
+                >Idle · Scanner ready to intercept payload</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Technical Filtering Capabilities -->
+      <section class="section-divider">
+        <h2
+          style="
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+          "
+        >
+          Deterministic Filter Pipeline
+        </h2>
+        <p style="color: var(--text-muted); font-size: 14px">
+          Every campaign is evaluated client-side across 10 distinct parameters.
+        </p>
+
+        <div class="specs-grid">
+          <div class="spec-item">
+            <h3>Platform CPM Rates</h3>
+            <p>
+              Specific rates per 1,000 views for TikTok, YouTube, Instagram,
+              Facebook, and X independently.
+            </p>
+          </div>
+          <div class="spec-item">
+            <h3>Payout View Bounds</h3>
+            <p>
+              Minimum and maximum views required before a campaign starts paying
+              and caps out.
+            </p>
+          </div>
+          <div class="spec-item">
+            <h3>Available Budget</h3>
+            <p>
+              Remaining balance left in the creator fund, derived from total
+              budget minus budget spent.
+            </p>
+          </div>
+          <div class="spec-item">
+            <h3>Clippers Competition</h3>
+            <p>
+              Filter by active creator count to avoid heavily saturated
+              campaigns.
+            </p>
+          </div>
+          <div class="spec-item">
+            <h3>Campaign Age</h3>
+            <p>
+              Identify newly funded campaigns versus stale listings running for
+              months.
+            </p>
+          </div>
+          <div class="spec-item">
+            <h3>DOM Card Removal</h3>
+            <p>
+              Disqualified campaigns are removed from layout flow rather than
+              greyed out.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payout Estimator Widget -->
+      <section class="section-divider" id="calculator">
+        <h2
+          style="
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+          "
+        >
+          Clipper Earnings Estimator
+        </h2>
+        <p style="color: var(--text-muted); font-size: 14px">
+          Calculate expected payout based on campaign CPM rate and expected view
+          targets.
+        </p>
+
+        <div class="calc-box">
+          <div>
+            <div style="margin-bottom: 18px">
+              <div class="control-row">
+                <span style="color: var(--text-muted)">Projected Views</span>
+                <b id="userViewsLabel" style="color: var(--text)">250,000</b>
+              </div>
+              <input
+                type="range"
+                class="native-range"
+                id="userViews"
+                min="10000"
+                max="1000000"
+                step="10000"
+                value="250000"
+                oninput="calcEarnings()"
+              />
+            </div>
+
+            <div>
+              <div class="control-row">
+                <span style="color: var(--text-muted)"
+                  >Platform CPM ($ / 1k views)</span
+                >
+                <b id="userCpmLabel" style="color: var(--text)">$2.50</b>
+              </div>
+              <input
+                type="range"
+                class="native-range"
+                id="userCpm"
+                min="0.50"
+                max="6.00"
+                step="0.25"
+                value="2.50"
+                oninput="calcEarnings()"
+              />
+            </div>
+          </div>
+
+          <div class="calc-output">
+            <div class="calc-output-title">Estimated Payout</div>
+            <div class="calc-output-val" id="calcEarningsDisplay">$625.00</div>
+            <div style="font-size: 12px; color: var(--text-muted)">
+              Excludes platform view caps
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comprehensive Browser Installation Guide -->
+      <section class="section-divider" id="installation">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            flex-wrap: gap;
+            gap: 16px;
+          "
+        >
+          <div>
+            <h2
+              style="
+                font-size: 24px;
+                font-weight: 700;
+                letter-spacing: -0.02em;
+                margin-bottom: 6px;
+              "
+            >
+              How to Add to Your Browser
+            </h2>
+            <p style="color: var(--text-muted); font-size: 14px">
+              Takes under 30 seconds. Works seamlessly across any Chromium-based
+              browser.
+            </p>
+          </div>
+        </div>
+
+        <!-- Browser Selector Tabs -->
+        <div class="browser-tabs">
+          <button
+            type="button"
+            class="browser-tab-btn active"
+            onclick="switchBrowserTab(this, 'chrome')"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A6 6 0 0 1 12 6h9.536A12 12 0 0 0 12 0zm-1.127 12.01L5.438 2.569A12 12 0 0 0 0 12c0 5.485 3.676 10.11 8.688 11.57l3.952-6.846A6 6 0 0 1 10.873 12zm1.254 0a6 6 0 0 1 4.536 2.072l5.435-9.414A12 12 0 0 0 12 0v6a6 6 0 0 1 .127 6.01zm-3.072 1.99a3 3 0 1 0 5.89 0 3 3 0 0 0-5.89 0z"
+              />
+            </svg>
+            Google Chrome
+          </button>
+          <button
+            type="button"
+            class="browser-tab-btn"
+            onclick="switchBrowserTab(this, 'brave')"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm1.096 17.584l-2.192-3.796H7.5v-3.576h3.404l2.192-3.796 3.096 5.384-3.096 5.784z"
+              />
+            </svg>
+            Brave Browser
+          </button>
+          <button
+            type="button"
+            class="browser-tab-btn"
+            onclick="switchBrowserTab(this, 'edge')"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M0 12c0-3.314 1.343-6.314 3.515-8.485C5.686 1.343 8.686 0 12 0c3.314 0 6.314 1.343 8.485 3.515C22.657 5.686 24 8.686 24 12s-1.343 6.314-3.515 8.485C18.314 22.657 15.314 24 12 24s-6.314-1.343-8.485-3.515C1.343 18.314 0 15.314 0 12z"
+              />
+            </svg>
+            Microsoft Edge
+          </button>
+          <button
+            type="button"
+            class="browser-tab-btn"
+            onclick="switchBrowserTab(this, 'arc')"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+            Arc & Opera
+          </button>
+        </div>
+
+        <!-- Step Cards -->
+        <div class="install-steps-flow">
+          <div class="install-step-box">
+            <div class="step-badge">1</div>
+            <h4>Download Extension Folder</h4>
+            <p>
+              Download the repository as a ZIP from GitHub and extract the
+              folder onto your computer.
+            </p>
+            <div class="inline-code-box">
+              <span>Whop-Hunter.zip</span>
+              <a
+                href="https://github.com/Mujtabahaider-Dev/Whop-Hunter/archive/refs/heads/main.zip"
+                style="
+                  color: #ffffff;
+                  font-weight: 600;
+                  text-decoration: underline;
+                  font-size: 11.5px;
+                "
+                >Download</a
+              >
+            </div>
+          </div>
+
+          <div class="install-step-box">
+            <div class="step-badge">2</div>
+            <h4>Open Extensions Manager</h4>
+            <p id="browserStep2Text">
+              Navigate to <span class="url-chip">chrome://extensions</span> and
+              switch on the <b style="color: #fff">Developer mode</b> toggle in
+              the top-right corner.
+            </p>
+            <div class="inline-code-box">
+              <span id="browserUrlSnippet">chrome://extensions</span>
+              <span style="color: var(--text-faint); font-size: 11px"
+                >Developer mode: ON</span
+              >
+            </div>
+          </div>
+
+          <div class="install-step-box">
+            <div class="step-badge">3</div>
+            <h4>Click "Load unpacked"</h4>
+            <p>
+              Click the <b style="color: #fff">Load unpacked</b> button in the
+              top-left, select the extracted folder, and Whop Hunter will
+              instantly appear in your extensions!
+            </p>
+            <div class="inline-code-box">
+              <span style="color: #34d399">✓ Installed & Active</span>
+              <span style="font-size: 11px; color: var(--text-muted)"
+                >Ready to hunt</span
+              >
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Whop Link Banner -->
+        <div
+          style="
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="font-size: 18px">🎯</span>
+            <div style="font-size: 13.5px">
+              <b>Next Step:</b> Open Whop and click the Whop Hunter icon in your
+              browser toolbar to activate the drawer.
+            </div>
+          </div>
+          <a
+            href="https://whop.com/discover/app/app_QRxsQodZgK1r4D"
+            target="_blank"
+            class="btn-small"
+            style="
+              background: var(--primary);
+              border-color: transparent;
+              color: #fff;
+            "
+          >
+            Open Whop Content Rewards →
           </a>
         </div>
-      </nav>
-    </div>
-  </header>
+      </section>
 
-  <main class="container">
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-tag">
-        <span class="dot"></span>
-        v1.0.5 · Free & Open Source Chrome Extension
-      </div>
-      <h1>Filter Whop clipping campaigns by the rates that actually pay.</h1>
-      <p class="hero-desc">
-        Whop shows a single generic CPM on the card, but TikTok, YouTube, and Instagram pay completely different rates with hidden view minimums. Whop Hunter inspects the raw campaign payloads and strips out any card that doesn't meet your criteria.
-      </p>
-      <div class="hero-cta">
-        <a href="https://github.com/Mujtabahaider-Dev/Whop-Hunter/archive/refs/heads/main.zip" class="btn-primary">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download Extension (.zip)
-        </a>
-        <a href="#installation" class="btn-outline">
-          Installation Guide
-        </a>
-      </div>
-    </section>
+      <!-- FAQ -->
+      <section class="section-divider" id="faq">
+        <h2
+          style="
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+          "
+        >
+          Frequently Asked Questions
+        </h2>
 
-    <!-- Real Product Interface Preview -->
-    <section class="app-frame" id="how-it-works">
-      <div class="app-topbar">
-        <div class="window-controls">
-          <span class="window-dot"></span>
-          <span class="window-dot"></span>
-          <span class="window-dot"></span>
+        <div class="faq-list">
+          <details class="faq-entry">
+            <summary>Does Whop Hunter require an account?</summary>
+            <p>
+              No. Whop Hunter is completely barrier-free. There is no sign-up,
+              email collection, or authentication required.
+            </p>
+          </details>
+
+          <details class="faq-entry">
+            <summary>Is there a limit on how many times I can filter?</summary>
+            <p>
+              No. Unlike proprietary tools that limit free users to 5 filter
+              runs per month, Whop Hunter allows unlimited filter runs forever.
+            </p>
+          </details>
+
+          <details class="faq-entry">
+            <summary>
+              How does Whop Hunter retrieve platform-specific rates?
+            </summary>
+            <p>
+              When you browse Whop's Discover listing, the extension taps into
+              the client-side network stream and card endpoints to read the full
+              payout payload, decoding individual platform rates without
+              navigating away.
+            </p>
+          </details>
+
+          <details class="faq-entry">
+            <summary>
+              Does this tool collect or transmit my browsing data?
+            </summary>
+            <p>
+              No. The extension runs locally within your browser context. It
+              does not send analytics, telemetry, or campaign data to external
+              servers.
+            </p>
+          </details>
+
+          <details class="faq-entry">
+            <summary>Is Whop Hunter officially affiliated with Whop?</summary>
+            <p>
+              No. Whop Hunter is an open-source community utility and is not
+              affiliated with, maintained by, or endorsed by Whop.com.
+            </p>
+          </details>
         </div>
-        <div>whop.com/discover/content-rewards</div>
-        <div style="color: var(--accent); font-weight: 600;">Whop Hunter Hook: Active</div>
-      </div>
-      <div class="app-workspace">
-        <!-- Live Table View -->
-        <div class="app-table-area">
-          <div class="app-table-title">
-            <span>Campaign Discover Feed (Live Simulation)</span>
-            <span id="matchStats" style="font-family: var(--font-mono); color: var(--accent);">500 campaigns → 3 matches</span>
-          </div>
-          <table class="whop-table">
-            <thead>
-              <tr>
-                <th>Campaign</th>
-                <th>TikTok CPM</th>
-                <th>Pool Remaining</th>
-                <th>Clippers</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="demoTableBody">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
+      </section>
+    </main>
 
-        <!-- Filter Drawer Side -->
-        <div class="app-drawer-side">
-          <div class="drawer-head">
-            <span class="drawer-head-title">
-              <img src="icons/icon128.png" style="width: 18px; height: 18px; border-radius: 4px;" alt="" />
-              Filters
-            </span>
-            <span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: var(--border); color: var(--text-muted); font-family: var(--font-mono);">NO LOGIN</span>
-          </div>
-
-          <div class="control-block">
-            <div class="control-row">
-              <span>Min TikTok CPM</span>
-              <b id="cpmThresholdLabel">$2.00 / 1k</b>
-            </div>
-            <input type="range" class="native-range" id="filterCpmSlider" min="0.50" max="4.00" step="0.25" value="2.00" oninput="runTableFilter()" />
-          </div>
-
-          <div class="control-block">
-            <div class="control-row">
-              <span>Max Clippers</span>
-              <b id="clipperThresholdLabel">50 clippers</b>
-            </div>
-            <input type="range" class="native-range" id="filterClippersSlider" min="10" max="200" step="10" value="50" oninput="runTableFilter()" />
-          </div>
-
-          <div class="control-block">
-            <div class="control-row">
-              <span>Min Remaining Budget</span>
-              <b id="budgetThresholdLabel">$1,000</b>
-            </div>
-            <input type="range" class="native-range" id="filterBudgetSlider" min="100" max="5000" step="200" value="1000" oninput="runTableFilter()" />
-          </div>
-
-          <button type="button" class="btn-primary" style="justify-content: center; width: 100%; font-size: 12.5px; padding: 8px 0;" onclick="runTableFilter()">
-            Apply Filter Engine
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Interactive Speed & Architecture Benchmark -->
-    <section class="section-divider" id="benchmark-section">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-        <div>
-          <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green);"></span>
-            Live Performance Benchmark
-          </div>
-          <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px;">500 Campaigns: Manual vs. Whop Hunter</h2>
-          <p style="color: var(--text-muted); font-size: 14px;">Watch real-time DOM processing vs manual click-through times on 500 creator reward cards.</p>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <div style="display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2px;">
-            <button type="button" id="speedModeFast" onclick="setBenchmarkSpeed('fast')" style="all: unset; cursor: pointer; padding: 5px 10px; font-size: 11.5px; font-weight: 600; border-radius: 4px; background: var(--border-focus); color: #fff; transition: all 0.15s;">
-              Fast Demo (4s)
-            </button>
-            <button type="button" id="speedModeReal" onclick="setBenchmarkSpeed('real')" style="all: unset; cursor: pointer; padding: 5px 10px; font-size: 11.5px; font-weight: 500; border-radius: 4px; color: var(--text-muted); transition: all 0.15s;">
-              Realtime (20s)
-            </button>
-          </div>
-          <button type="button" id="benchmarkStartBtn" onclick="triggerBenchmark()" class="btn-primary" style="padding: 7px 16px; font-size: 12.5px;">
-            <svg id="benchmarkBtnIcon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            <span id="benchmarkBtnLabel">Start Benchmark</span>
-          </button>
-          <button type="button" onclick="resetBenchmark()" class="btn-outline" style="padding: 7px 12px; font-size: 12.5px;">
-            Reset
-          </button>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <!-- Manual Review Card -->
-        <div class="metric-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-content">
+          <div>Whop Hunter · Open Source MIT License</div>
           <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <div class="metric-title" style="margin-bottom: 0;">MANUAL REVIEW (WITHOUT EXTENSION)</div>
-              <span style="font-size: 11px; padding: 2px 7px; border-radius: 4px; background: rgba(244, 63, 94, 0.12); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.25); font-family: var(--font-mono); font-weight: 600;">BY HAND</span>
-            </div>
-            
-            <div style="display: flex; align-items: baseline; gap: 12px;">
-              <div class="metric-value" id="manualTimer" style="color: var(--red); font-variant-numeric: tabular-nums;">00:00:00</div>
-              <span id="manualTargetTotal" style="font-size: 13px; font-family: var(--font-mono); color: var(--text-muted);">Goal: ~2h 05m</span>
-            </div>
-
-            <!-- Progress Bar -->
-            <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 999px; height: 7px; overflow: hidden; margin: 10px 0 12px;">
-              <div id="manualProgressBar" style="width: 0%; height: 100%; background: #f43f5e; border-radius: 999px; transition: width 0.08s linear;"></div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px;">
-              <span style="color: var(--text-muted);">Reviewed: <b id="manualCardsDone" style="font-family: var(--font-mono); color: var(--text);">0 / 500 cards</b></span>
-              <span id="manualTimeRemaining" style="font-family: var(--font-mono); color: #f43f5e;">~2h 05m to go</span>
-            </div>
-
-            <p class="metric-sub">Opening 500 cards individually, digging for specific platform payout rates, calculating thresholds, and navigating back.</p>
-          </div>
-
-          <!-- Activity Log Feed -->
-          <div id="manualLogBox" style="margin-top: 18px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); min-height: 38px; display: flex; align-items: center; gap: 8px;">
-            <span style="color: var(--text-faint);">●</span>
-            <span id="manualLogText">Idle · Click 'Start Benchmark' to begin test</span>
-          </div>
-        </div>
-
-        <!-- Whop Hunter Automated Card -->
-        <div class="metric-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <div class="metric-title" style="margin-bottom: 0;">WITH WHOP HUNTER</div>
-              <span style="font-size: 11px; padding: 2px 7px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-family: var(--font-mono); font-weight: 600;">IN-MEMORY DOM ENGINE</span>
-            </div>
-
-            <div style="display: flex; align-items: baseline; gap: 12px;">
-              <div class="metric-value" id="hunterTimer" style="color: var(--green); font-variant-numeric: tabular-nums;">00:00:00</div>
-              <span id="hunterTargetTotal" style="font-size: 13px; font-family: var(--font-mono); color: #34d399;">Cap: 00:00:20 (20s)</span>
-            </div>
-
-            <!-- Progress Bar -->
-            <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 999px; height: 7px; overflow: hidden; margin: 10px 0 12px;">
-              <div id="hunterProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 999px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); transition: width 0.08s linear;"></div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px;">
-              <span style="color: var(--text-muted);">Scanned: <b id="hunterCardsDone" style="font-family: var(--font-mono); color: #34d399;">0 / 500 cards</b></span>
-              <span id="hunterSpeedup" style="font-family: var(--font-mono); color: var(--accent);">375x faster</span>
-            </div>
-
-            <p class="metric-sub">Inspects raw network chunks in memory and removes all non-qualifying campaign cards directly from the DOM.</p>
-          </div>
-
-          <!-- Activity Log Feed -->
-          <div id="hunterLogBox" style="margin-top: 18px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); min-height: 38px; display: flex; align-items: center; gap: 8px;">
-            <span style="color: var(--green);">●</span>
-            <span id="hunterLogText">Idle · Scanner ready to intercept payload</span>
+            <a
+              href="https://github.com/Mujtabahaider-Dev/Whop-Hunter"
+              target="_blank"
+              style="color: var(--text-muted); margin-right: 16px"
+              >GitHub</a
+            >
+            <a
+              href="mailto:contact@whophunter.com"
+              style="color: var(--text-muted)"
+              >contact@whophunter.com</a
+            >
           </div>
         </div>
       </div>
-    </section>
+    </footer>
 
-    <!-- Technical Filtering Capabilities -->
-    <section class="section-divider">
-      <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px;">Deterministic Filter Pipeline</h2>
-      <p style="color: var(--text-muted); font-size: 14px;">Every campaign is evaluated client-side across 10 distinct parameters.</p>
+    <script>
+      // Live table dataset
+      const mockCampaigns = [
+        { name: "Apex Clips Vault", cpm: 3.2, budget: 8400, clippers: 18 },
+        { name: "SaaS Growth Hub", cpm: 2.5, budget: 12000, clippers: 42 },
+        { name: "Velocity Trading Lab", cpm: 2.1, budget: 4500, clippers: 31 },
+        { name: "Fitness Blueprint UGC", cpm: 1.4, budget: 800, clippers: 85 },
+        { name: "Crypto Signals Daily", cpm: 0.9, budget: 400, clippers: 120 },
+        { name: "AI Prompts Library", cpm: 0.6, budget: 200, clippers: 190 },
+      ];
 
-      <div class="specs-grid">
-        <div class="spec-item">
-          <h3>Platform CPM Rates</h3>
-          <p>Specific rates per 1,000 views for TikTok, YouTube, Instagram, Facebook, and X independently.</p>
-        </div>
-        <div class="spec-item">
-          <h3>Payout View Bounds</h3>
-          <p>Minimum and maximum views required before a campaign starts paying and caps out.</p>
-        </div>
-        <div class="spec-item">
-          <h3>Available Budget</h3>
-          <p>Remaining balance left in the creator fund, derived from total budget minus budget spent.</p>
-        </div>
-        <div class="spec-item">
-          <h3>Clippers Competition</h3>
-          <p>Filter by active creator count to avoid heavily saturated campaigns.</p>
-        </div>
-        <div class="spec-item">
-          <h3>Campaign Age</h3>
-          <p>Identify newly funded campaigns versus stale listings running for months.</p>
-        </div>
-        <div class="spec-item">
-          <h3>DOM Card Removal</h3>
-          <p>Disqualified campaigns are removed from layout flow rather than greyed out.</p>
-        </div>
-      </div>
-    </section>
+      function switchBrowserTab(btn, browser) {
+        document
+          .querySelectorAll(".browser-tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
 
-    <!-- Payout Estimator Widget -->
-    <section class="section-divider" id="calculator">
-      <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px;">Clipper Earnings Estimator</h2>
-      <p style="color: var(--text-muted); font-size: 14px;">Calculate expected payout based on campaign CPM rate and expected view targets.</p>
+        const step2Text = document.getElementById("browserStep2Text");
+        const snippet = document.getElementById("browserUrlSnippet");
 
-      <div class="calc-box">
-        <div>
-          <div style="margin-bottom: 18px;">
-            <div class="control-row">
-              <span style="color: var(--text-muted);">Projected Views</span>
-              <b id="userViewsLabel" style="color: var(--text);">250,000</b>
-            </div>
-            <input type="range" class="native-range" id="userViews" min="10000" max="1000000" step="10000" value="250000" oninput="calcEarnings()" />
-          </div>
-
-          <div>
-            <div class="control-row">
-              <span style="color: var(--text-muted);">Platform CPM ($ / 1k views)</span>
-              <b id="userCpmLabel" style="color: var(--text);">$2.50</b>
-            </div>
-            <input type="range" class="native-range" id="userCpm" min="0.50" max="6.00" step="0.25" value="2.50" oninput="calcEarnings()" />
-          </div>
-        </div>
-
-        <div class="calc-output">
-          <div class="calc-output-title">Estimated Payout</div>
-          <div class="calc-output-val" id="calcEarningsDisplay">$625.00</div>
-          <div style="font-size: 12px; color: var(--text-muted);">Excludes platform view caps</div>
-        </div>
-      </div>
-    </section>
-
-    
-    <!-- Comprehensive Browser Installation Guide -->
-    <section class="section-divider" id="installation">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: gap; gap: 16px;">
-        <div>
-          <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px;">How to Add to Your Browser</h2>
-          <p style="color: var(--text-muted); font-size: 14px;">Takes under 30 seconds. Works seamlessly across any Chromium-based browser.</p>
-        </div>
-      </div>
-
-      <!-- Browser Selector Tabs -->
-      <div class="browser-tabs">
-        <button type="button" class="browser-tab-btn active" onclick="switchBrowserTab(this, 'chrome')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A6 6 0 0 1 12 6h9.536A12 12 0 0 0 12 0zm-1.127 12.01L5.438 2.569A12 12 0 0 0 0 12c0 5.485 3.676 10.11 8.688 11.57l3.952-6.846A6 6 0 0 1 10.873 12zm1.254 0a6 6 0 0 1 4.536 2.072l5.435-9.414A12 12 0 0 0 12 0v6a6 6 0 0 1 .127 6.01zm-3.072 1.99a3 3 0 1 0 5.89 0 3 3 0 0 0-5.89 0z"/></svg>
-          Google Chrome
-        </button>
-        <button type="button" class="browser-tab-btn" onclick="switchBrowserTab(this, 'brave')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm1.096 17.584l-2.192-3.796H7.5v-3.576h3.404l2.192-3.796 3.096 5.384-3.096 5.784z"/></svg>
-          Brave Browser
-        </button>
-        <button type="button" class="browser-tab-btn" onclick="switchBrowserTab(this, 'edge')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M0 12c0-3.314 1.343-6.314 3.515-8.485C5.686 1.343 8.686 0 12 0c3.314 0 6.314 1.343 8.485 3.515C22.657 5.686 24 8.686 24 12s-1.343 6.314-3.515 8.485C18.314 22.657 15.314 24 12 24s-6.314-1.343-8.485-3.515C1.343 18.314 0 15.314 0 12z"/></svg>
-          Microsoft Edge
-        </button>
-        <button type="button" class="browser-tab-btn" onclick="switchBrowserTab(this, 'arc')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-          Arc & Opera
-        </button>
-      </div>
-
-      <!-- Step Cards -->
-      <div class="install-steps-flow">
-        <div class="install-step-box">
-          <div class="step-badge">1</div>
-          <h4>Download Extension Folder</h4>
-          <p>Download the repository as a ZIP from GitHub and extract the folder onto your computer.</p>
-          <div class="inline-code-box">
-            <span>Whop-Hunter.zip</span>
-            <a href="https://github.com/Mujtabahaider-Dev/Whop-Hunter/archive/refs/heads/main.zip" style="color: #ffffff; font-weight: 600; text-decoration: underline; font-size: 11.5px;">Download</a>
-          </div>
-        </div>
-
-        <div class="install-step-box">
-          <div class="step-badge">2</div>
-          <h4>Open Extensions Manager</h4>
-          <p id="browserStep2Text">Navigate to <span class="url-chip">chrome://extensions</span> and switch on the <b style="color:#fff;">Developer mode</b> toggle in the top-right corner.</p>
-          <div class="inline-code-box">
-            <span id="browserUrlSnippet">chrome://extensions</span>
-            <span style="color: var(--text-faint); font-size: 11px;">Developer mode: ON</span>
-          </div>
-        </div>
-
-        <div class="install-step-box">
-          <div class="step-badge">3</div>
-          <h4>Click "Load unpacked"</h4>
-          <p>Click the <b style="color: #fff;">Load unpacked</b> button in the top-left, select the extracted folder, and Whop Hunter will instantly appear in your extensions!</p>
-          <div class="inline-code-box">
-            <span style="color: #34d399;">✓ Installed & Active</span>
-            <span style="font-size: 11px; color: var(--text-muted);">Ready to hunt</span>
-          </div>
-        </div>
-      </div>
-
-      
-      <!-- Visual Step-by-Step Diagram Graphic -->
-      <div style="margin: 30px 0 24px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-subtle); box-shadow: 0 12px 32px rgba(0,0,0,0.35);">
-        <div style="padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
-          <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            Visual Walkthrough: Adding Unpacked Extension
-          </div>
-          <span style="font-size: 11px; font-family: var(--font-mono); color: var(--accent);">Chrome & Chromium</span>
-        </div>
-        <div style="padding: 16px; background: #07080a;">
-          <img src="assets/install-guide.svg" alt="Chrome Extension Installation Visual Guide" style="width: 100%; height: auto; display: block; border-radius: 8px;" />
-        </div>
-      </div>
-
-      <!-- Whop Link Banner -->
-      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span style="font-size: 18px;">🎯</span>
-          <div style="font-size: 13.5px;">
-            <b>Next Step:</b> Open Whop and click the Whop Hunter icon in your browser toolbar to activate the drawer.
-          </div>
-        </div>
-        <a href="https://whop.com/discover/app/app_QRxsQodZgK1r4D" target="_blank" class="btn-small" style="background: var(--primary); border-color: transparent; color: #fff;">
-          Open Whop Content Rewards →
-        </a>
-      </div>
-    </section>
-
-
-    <!-- FAQ -->
-    <section class="section-divider" id="faq">
-      <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px;">Frequently Asked Questions</h2>
-
-      <div class="faq-list">
-        <details class="faq-entry">
-          <summary>Does Whop Hunter require an account?</summary>
-          <p>No. Whop Hunter is completely barrier-free. There is no sign-up, email collection, or authentication required.</p>
-        </details>
-
-        <details class="faq-entry">
-          <summary>Is there a limit on how many times I can filter?</summary>
-          <p>No. Unlike proprietary tools that limit free users to 5 filter runs per month, Whop Hunter allows unlimited filter runs forever.</p>
-        </details>
-
-        <details class="faq-entry">
-          <summary>How does Whop Hunter retrieve platform-specific rates?</summary>
-          <p>When you browse Whop's Discover listing, the extension taps into the client-side network stream and card endpoints to read the full payout payload, decoding individual platform rates without navigating away.</p>
-        </details>
-
-        <details class="faq-entry">
-          <summary>Does this tool collect or transmit my browsing data?</summary>
-          <p>No. The extension runs locally within your browser context. It does not send analytics, telemetry, or campaign data to external servers.</p>
-        </details>
-
-        <details class="faq-entry">
-          <summary>Is Whop Hunter officially affiliated with Whop?</summary>
-          <p>No. Whop Hunter is an open-source community utility and is not affiliated with, maintained by, or endorsed by Whop.com.</p>
-        </details>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-content">
-        <div>Whop Hunter · Open Source MIT License</div>
-        <div>
-          <a href="https://github.com/Mujtabahaider-Dev/Whop-Hunter" target="_blank" style="color: var(--text-muted); margin-right: 16px;">GitHub</a>
-          <a href="mailto:contact@whophunter.com" style="color: var(--text-muted);">contact@whophunter.com</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    // Live table dataset
-    const mockCampaigns = [
-      { name: "Apex Clips Vault", cpm: 3.20, budget: 8400, clippers: 18 },
-      { name: "SaaS Growth Hub", cpm: 2.50, budget: 12000, clippers: 42 },
-      { name: "Velocity Trading Lab", cpm: 2.10, budget: 4500, clippers: 31 },
-      { name: "Fitness Blueprint UGC", cpm: 1.40, budget: 800, clippers: 85 },
-      { name: "Crypto Signals Daily", cpm: 0.90, budget: 400, clippers: 120 },
-      { name: "AI Prompts Library", cpm: 0.60, budget: 200, clippers: 190 }
-    ];
-
-    
-    function switchBrowserTab(btn, browser) {
-      document.querySelectorAll('.browser-tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const step2Text = document.getElementById('browserStep2Text');
-      const snippet = document.getElementById('browserUrlSnippet');
-
-      if (browser === 'chrome') {
-        step2Text.innerHTML = 'Navigate to <span class="url-chip">chrome://extensions</span> and switch on the <b style="color:#fff;">Developer mode</b> toggle in the top-right corner.';
-        snippet.textContent = 'chrome://extensions';
-      } else if (browser === 'brave') {
-        step2Text.innerHTML = 'Navigate to <span class="url-chip">brave://extensions</span> and toggle on <b style="color:#fff;">Developer mode</b> in the top right.';
-        snippet.textContent = 'brave://extensions';
-      } else if (browser === 'edge') {
-        step2Text.innerHTML = 'Navigate to <span class="url-chip">edge://extensions</span> and enable <b style="color:#fff;">Developer mode</b> in the left sidebar.';
-        snippet.textContent = 'edge://extensions';
-      } else if (browser === 'arc') {
-        step2Text.innerHTML = 'Open your extensions settings or press <b style="color:#fff;">Cmd/Ctrl + E</b>, then click <b style="color:#fff;">Developer mode</b>.';
-        snippet.textContent = 'arc://extensions';
+        if (browser === "chrome") {
+          step2Text.innerHTML =
+            'Navigate to <span class="url-chip">chrome://extensions</span> and switch on the <b style="color:#fff;">Developer mode</b> toggle in the top-right corner.';
+          snippet.textContent = "chrome://extensions";
+        } else if (browser === "brave") {
+          step2Text.innerHTML =
+            'Navigate to <span class="url-chip">brave://extensions</span> and toggle on <b style="color:#fff;">Developer mode</b> in the top right.';
+          snippet.textContent = "brave://extensions";
+        } else if (browser === "edge") {
+          step2Text.innerHTML =
+            'Navigate to <span class="url-chip">edge://extensions</span> and enable <b style="color:#fff;">Developer mode</b> in the left sidebar.';
+          snippet.textContent = "edge://extensions";
+        } else if (browser === "arc") {
+          step2Text.innerHTML =
+            'Open your extensions settings or press <b style="color:#fff;">Cmd/Ctrl + E</b>, then click <b style="color:#fff;">Developer mode</b>.';
+          snippet.textContent = "arc://extensions";
+        }
       }
-    }
 
-    function runTableFilter() {
-      const minCpm = parseFloat(document.getElementById('filterCpmSlider').value);
-      const maxClippers = parseInt(document.getElementById('filterClippersSlider').value, 10);
-      const minBudget = parseInt(document.getElementById('filterBudgetSlider').value, 10);
+      function runTableFilter() {
+        const minCpm = parseFloat(
+          document.getElementById("filterCpmSlider").value,
+        );
+        const maxClippers = parseInt(
+          document.getElementById("filterClippersSlider").value,
+          10,
+        );
+        const minBudget = parseInt(
+          document.getElementById("filterBudgetSlider").value,
+          10,
+        );
 
-      document.getElementById('cpmThresholdLabel').textContent = '$' + minCpm.toFixed(2) + ' / 1k';
-      document.getElementById('clipperThresholdLabel').textContent = maxClippers + ' clippers';
-      document.getElementById('budgetThresholdLabel').textContent = '$' + minBudget.toLocaleString();
+        document.getElementById("cpmThresholdLabel").textContent =
+          "$" + minCpm.toFixed(2) + " / 1k";
+        document.getElementById("clipperThresholdLabel").textContent =
+          maxClippers + " clippers";
+        document.getElementById("budgetThresholdLabel").textContent =
+          "$" + minBudget.toLocaleString();
 
-      const tbody = document.getElementById('demoTableBody');
-      tbody.innerHTML = '';
+        const tbody = document.getElementById("demoTableBody");
+        tbody.innerHTML = "";
 
-      let matches = 0;
+        let matches = 0;
 
-      mockCampaigns.forEach(c => {
-        const passes = c.cpm >= minCpm && c.clippers <= maxClippers && c.budget >= minBudget;
-        if (passes) matches++;
+        mockCampaigns.forEach((c) => {
+          const passes =
+            c.cpm >= minCpm &&
+            c.clippers <= maxClippers &&
+            c.budget >= minBudget;
+          if (passes) matches++;
 
-        const tr = document.createElement('tr');
-        if (!passes) tr.className = 'hidden-row';
+          const tr = document.createElement("tr");
+          if (!passes) tr.className = "hidden-row";
 
-        tr.innerHTML = `
+          tr.innerHTML = `
           <td style="font-weight: 500;">${c.name}</td>
           <td class="badge-cpm">$${c.cpm.toFixed(2)}</td>
           <td style="font-family: var(--font-mono);">$${c.budget.toLocaleString()}</td>
           <td>${c.clippers}</td>
           <td>${passes ? '<span class="badge-match">Match</span>' : '<span style="color: var(--text-faint); font-size: 11px;">Filtered</span>'}</td>
         `;
-        tbody.appendChild(tr);
-      });
+          tbody.appendChild(tr);
+        });
 
-      document.getElementById('matchStats').textContent = '500 campaigns → ' + matches + ' matches';
-    }
-
-    function calcEarnings() {
-      const views = parseInt(document.getElementById('userViews').value, 10);
-      const cpm = parseFloat(document.getElementById('userCpm').value);
-      const total = (views / 1000) * cpm;
-
-      document.getElementById('userViewsLabel').textContent = views.toLocaleString();
-      document.getElementById('userCpmLabel').textContent = '$' + cpm.toFixed(2);
-      document.getElementById('calcEarningsDisplay').textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    // Init
-    runTableFilter();
-    calcEarnings();
-
-    // --- Interactive Speed Benchmark Engine ---
-    let benchmarkState = {
-      running: false,
-      speedMode: 'fast', // 'fast' = 4s animation, 'real' = 20s
-      elapsedMs: 0,
-      animId: null,
-      startTime: null
-    };
-
-    function setBenchmarkSpeed(mode) {
-      if (benchmarkState.running) resetBenchmark();
-      benchmarkState.speedMode = mode;
-      
-      const fastBtn = document.getElementById('speedModeFast');
-      const realBtn = document.getElementById('speedModeReal');
-      
-      if (mode === 'fast') {
-        fastBtn.style.background = 'var(--border-focus)';
-        fastBtn.style.color = '#fff';
-        realBtn.style.background = 'transparent';
-        realBtn.style.color = 'var(--text-muted)';
-      } else {
-        realBtn.style.background = 'var(--border-focus)';
-        realBtn.style.color = '#fff';
-        fastBtn.style.background = 'transparent';
-        fastBtn.style.color = 'var(--text-muted)';
+        document.getElementById("matchStats").textContent =
+          "500 campaigns → " + matches + " matches";
       }
-    }
 
-    function formatTimerStr(seconds) {
-      const s = Math.floor(seconds);
-      const hrs = Math.floor(s / 3600);
-      const mins = Math.floor((s % 3600) / 60);
-      const secs = s % 60;
-      return String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-    }
+      function calcEarnings() {
+        const views = parseInt(document.getElementById("userViews").value, 10);
+        const cpm = parseFloat(document.getElementById("userCpm").value);
+        const total = (views / 1000) * cpm;
 
-    function resetBenchmark() {
-      benchmarkState.running = false;
-      if (benchmarkState.animId) cancelAnimationFrame(benchmarkState.animId);
-      benchmarkState.animId = null;
-      benchmarkState.startTime = null;
-
-      document.getElementById('benchmarkBtnLabel').textContent = 'Start Benchmark';
-      document.getElementById('benchmarkBtnIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
-
-      // Reset Hunter
-      document.getElementById('hunterTimer').textContent = '00:00:00';
-      document.getElementById('hunterProgressBar').style.width = '0%';
-      document.getElementById('hunterCardsDone').textContent = '0 / 500 cards';
-      document.getElementById('hunterTargetTotal').textContent = 'Cap: 00:00:20 (20s)';
-      document.getElementById('hunterSpeedup').textContent = '375x faster';
-      document.getElementById('hunterLogText').textContent = 'Idle · Scanner ready to intercept payload';
-
-      // Reset Manual
-      document.getElementById('manualTimer').textContent = '00:00:00';
-      document.getElementById('manualProgressBar').style.width = '0%';
-      document.getElementById('manualCardsDone').textContent = '0 / 500 cards';
-      document.getElementById('manualTargetTotal').textContent = 'Goal: ~2h 05m';
-      document.getElementById('manualTimeRemaining').textContent = '~2h 05m to go';
-      document.getElementById('manualLogText').textContent = 'Idle · Click \'Start Benchmark\' to begin test';
-    }
-
-    function triggerBenchmark() {
-      if (benchmarkState.running) {
-        resetBenchmark();
-        return;
+        document.getElementById("userViewsLabel").textContent =
+          views.toLocaleString();
+        document.getElementById("userCpmLabel").textContent =
+          "$" + cpm.toFixed(2);
+        document.getElementById("calcEarningsDisplay").textContent =
+          "$" +
+          total.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
       }
-      resetBenchmark();
-      benchmarkState.running = true;
-      benchmarkState.startTime = performance.now();
-      
-      document.getElementById('benchmarkBtnLabel').textContent = 'Stop';
-      document.getElementById('benchmarkBtnIcon').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
 
-      const totalSimSeconds = 20; // Whop Hunter finishes in 20 simulated seconds
-      const animDurationMs = benchmarkState.speedMode === 'fast' ? 4000 : 20000;
+      // Init
+      runTableFilter();
+      calcEarnings();
 
-      const manualLogMessages = [
-        'Opening card #1 in separate browser tab...',
-        'Checking TikTok rate & calculating views...',
-        'Navigating back to Discover feed...',
-        'Opening card #2... reading YouTube CPM...'
-      ];
+      // --- Interactive Speed Benchmark Engine ---
+      let benchmarkState = {
+        running: false,
+        speedMode: "fast", // 'fast' = 4s animation, 'real' = 20s
+        elapsedMs: 0,
+        animId: null,
+        startTime: null,
+      };
 
-      const hunterLogMessages = [
-        'Intercepting /api/v2/rewards response chunk...',
-        'Parsing in-memory arrays for 500 campaigns...',
-        'Applying TikTok CPM >= $2.00 & budget filters...',
-        'Removing non-qualifying cards from DOM...',
-        'Complete! 488 disqualified, 12 high-paying matches left.'
-      ];
+      function setBenchmarkSpeed(mode) {
+        if (benchmarkState.running) resetBenchmark();
+        benchmarkState.speedMode = mode;
 
-      function step(now) {
-        if (!benchmarkState.running) return;
+        const fastBtn = document.getElementById("speedModeFast");
+        const realBtn = document.getElementById("speedModeReal");
 
-        const elapsed = now - benchmarkState.startTime;
-        const progress = Math.min(elapsed / animDurationMs, 1);
-        const currentSimSeconds = progress * totalSimSeconds;
-
-        // Update Hunter
-        const hunterCards = Math.floor(progress * 500);
-        document.getElementById('hunterTimer').textContent = formatTimerStr(currentSimSeconds);
-        document.getElementById('hunterProgressBar').style.width = (progress * 100).toFixed(1) + '%';
-        document.getElementById('hunterCardsDone').textContent = hunterCards + ' / 500 cards';
-
-        const hunterMsgIdx = Math.min(Math.floor(progress * hunterLogMessages.length), hunterLogMessages.length - 1);
-        document.getElementById('hunterLogText').textContent = hunterLogMessages[hunterMsgIdx];
-
-        // Update Manual (takes 15s per card in reality)
-        // In 20 seconds, human can only review 20/15 = 1.33 cards!
-        const manualCards = Math.min(Math.floor(currentSimSeconds / 15), 1);
-        const manualBarPct = Math.min((manualCards / 500) * 100, 1.5);
-        document.getElementById('manualTimer').textContent = formatTimerStr(currentSimSeconds);
-        document.getElementById('manualProgressBar').style.width = manualBarPct.toFixed(1) + '%';
-        document.getElementById('manualCardsDone').textContent = manualCards + ' / 500 cards';
-
-        const manualMsgIdx = Math.min(Math.floor(progress * manualLogMessages.length), manualLogMessages.length - 1);
-        document.getElementById('manualLogText').textContent = manualLogMessages[manualMsgIdx];
-
-        if (progress < 1) {
-          benchmarkState.animId = requestAnimationFrame(step);
+        if (mode === "fast") {
+          fastBtn.style.background = "var(--border-focus)";
+          fastBtn.style.color = "#fff";
+          realBtn.style.background = "transparent";
+          realBtn.style.color = "var(--text-muted)";
         } else {
-          // Finished benchmark!
-          benchmarkState.running = false;
-          document.getElementById('benchmarkBtnLabel').textContent = 'Replay Benchmark';
-          document.getElementById('benchmarkBtnIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
-
-          // Final Hunter state
-          document.getElementById('hunterTimer').textContent = '00:00:20';
-          document.getElementById('hunterProgressBar').style.width = '100%';
-          document.getElementById('hunterCardsDone').textContent = '500 / 500 (DONE)';
-          document.getElementById('hunterTargetTotal').textContent = 'Done in 20.0s flat!';
-          document.getElementById('hunterSpeedup').textContent = 'Saved: 2h 04m 40s';
-          document.getElementById('hunterLogText').innerHTML = '<b style="color: #34d399;">✓ Done!</b> Filtered all 500 campaigns in 20s.';
-
-          // Final Manual state
-          document.getElementById('manualTimer').textContent = '~2h 05m';
-          document.getElementById('manualTargetTotal').textContent = 'Still running...';
-          document.getElementById('manualCardsDone').textContent = '1 / 500 cards (0.2%)';
-          document.getElementById('manualTimeRemaining').textContent = '499 cards remaining';
-          document.getElementById('manualLogText').innerHTML = '<b style="color: #f43f5e;">Still going...</b> By hand needs 2 hours 5 minutes.';
+          realBtn.style.background = "var(--border-focus)";
+          realBtn.style.color = "#fff";
+          fastBtn.style.background = "transparent";
+          fastBtn.style.color = "var(--text-muted)";
         }
       }
 
-      benchmarkState.animId = requestAnimationFrame(step);
-    }
+      function formatTimerStr(seconds) {
+        const s = Math.floor(seconds);
+        const hrs = Math.floor(s / 3600);
+        const mins = Math.floor((s % 3600) / 60);
+        const secs = s % 60;
+        return (
+          String(hrs).padStart(2, "0") +
+          ":" +
+          String(mins).padStart(2, "0") +
+          ":" +
+          String(secs).padStart(2, "0")
+        );
+      }
 
-    // Auto-start benchmark once on scroll into view
-    let hasAutoStartedBenchmark = false;
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !hasAutoStartedBenchmark) {
-          hasAutoStartedBenchmark = true;
-          triggerBenchmark();
+      function resetBenchmark() {
+        benchmarkState.running = false;
+        if (benchmarkState.animId) cancelAnimationFrame(benchmarkState.animId);
+        benchmarkState.animId = null;
+        benchmarkState.startTime = null;
+
+        document.getElementById("benchmarkBtnLabel").textContent =
+          "Start Benchmark";
+        document.getElementById("benchmarkBtnIcon").innerHTML =
+          '<polygon points="5 3 19 12 5 21 5 3"/>';
+
+        // Reset Hunter
+        document.getElementById("hunterTimer").textContent = "00:00:00";
+        document.getElementById("hunterProgressBar").style.width = "0%";
+        document.getElementById("hunterCardsDone").textContent =
+          "0 / 500 cards";
+        document.getElementById("hunterTargetTotal").textContent =
+          "Cap: 00:00:20 (20s)";
+        document.getElementById("hunterSpeedup").textContent = "375x faster";
+        document.getElementById("hunterLogText").textContent =
+          "Idle · Scanner ready to intercept payload";
+
+        // Reset Manual
+        document.getElementById("manualTimer").textContent = "00:00:00";
+        document.getElementById("manualProgressBar").style.width = "0%";
+        document.getElementById("manualCardsDone").textContent =
+          "0 / 500 cards";
+        document.getElementById("manualTargetTotal").textContent =
+          "Goal: ~2h 05m";
+        document.getElementById("manualTimeRemaining").textContent =
+          "~2h 05m to go";
+        document.getElementById("manualLogText").textContent =
+          "Idle · Click 'Start Benchmark' to begin test";
+      }
+
+      function triggerBenchmark() {
+        if (benchmarkState.running) {
+          resetBenchmark();
+          return;
         }
-      });
-    }, { threshold: 0.35 });
+        resetBenchmark();
+        benchmarkState.running = true;
+        benchmarkState.startTime = performance.now();
 
-    const benchSection = document.getElementById('benchmark-section');
-    if (benchSection) observer.observe(benchSection);
+        document.getElementById("benchmarkBtnLabel").textContent =
+          "Stop Benchmark";
+        document.getElementById("benchmarkBtnIcon").innerHTML =
+          '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
 
-  </script>
-</body>
+        const totalSimSeconds = 20; // Whop Hunter finishes in 20 simulated seconds
+        const animDurationMs =
+          benchmarkState.speedMode === "fast" ? 4000 : 20000;
+
+        const manualLogMessages = [
+          "Opening card #1 in separate browser tab...",
+          "Checking TikTok rate & calculating views...",
+          "Navigating back to Discover feed...",
+          "Opening card #2... reading YouTube CPM...",
+        ];
+
+        const hunterLogMessages = [
+          "Intercepting /api/v2/rewards response chunk...",
+          "Parsing in-memory arrays for 500 campaigns...",
+          "Applying TikTok CPM >= $2.00 & budget filters...",
+          "Removing non-qualifying cards from DOM...",
+          "Complete! 488 disqualified, 12 high-paying matches left.",
+        ];
+
+        function step(now) {
+          if (!benchmarkState.running) return;
+
+          const elapsed = now - benchmarkState.startTime;
+          const progress = Math.min(elapsed / animDurationMs, 1);
+          const currentSimSeconds = progress * totalSimSeconds;
+
+          // Update Hunter
+          const hunterCards = Math.floor(progress * 500);
+          document.getElementById("hunterTimer").textContent =
+            formatTimerStr(currentSimSeconds);
+          document.getElementById("hunterProgressBar").style.width =
+            (progress * 100).toFixed(1) + "%";
+          document.getElementById("hunterCardsDone").textContent =
+            hunterCards + " / 500 cards";
+
+          const hunterMsgIdx = Math.min(
+            Math.floor(progress * hunterLogMessages.length),
+            hunterLogMessages.length - 1,
+          );
+          document.getElementById("hunterLogText").textContent =
+            hunterLogMessages[hunterMsgIdx];
+
+          // Update Manual (takes 15s per card in reality)
+          // In 20 seconds, human can only review 20/15 = 1.33 cards!
+          const manualCards = Math.min(Math.floor(currentSimSeconds / 15), 1);
+          const manualBarPct = Math.min((manualCards / 500) * 100, 1.5);
+          document.getElementById("manualTimer").textContent =
+            formatTimerStr(currentSimSeconds);
+          document.getElementById("manualProgressBar").style.width =
+            manualBarPct.toFixed(1) + "%";
+          document.getElementById("manualCardsDone").textContent =
+            manualCards + " / 500 cards";
+
+          const manualMsgIdx = Math.min(
+            Math.floor(progress * manualLogMessages.length),
+            manualLogMessages.length - 1,
+          );
+          document.getElementById("manualLogText").textContent =
+            manualLogMessages[manualMsgIdx];
+
+          if (progress < 1) {
+            benchmarkState.animId = requestAnimationFrame(step);
+          } else {
+            // Finished benchmark!
+            benchmarkState.running = false;
+            document.getElementById("benchmarkBtnLabel").textContent =
+              "Replay Benchmark";
+            document.getElementById("benchmarkBtnIcon").innerHTML =
+              '<polygon points="5 3 19 12 5 21 5 3"/>';
+
+            // Final Hunter state
+            document.getElementById("hunterTimer").textContent = "00:00:20";
+            document.getElementById("hunterProgressBar").style.width = "100%";
+            document.getElementById("hunterCardsDone").textContent =
+              "500 / 500 (DONE)";
+            document.getElementById("hunterTargetTotal").textContent =
+              "Done in 20.0s flat!";
+            document.getElementById("hunterSpeedup").textContent =
+              "Saved: 2h 04m 40s";
+            document.getElementById("hunterLogText").innerHTML =
+              '<b style="color: #34d399;">✓ Done!</b> Filtered all 500 campaigns in 20s.';
+
+            // Final Manual state
+            document.getElementById("manualTimer").textContent = "~2h 05m";
+            document.getElementById("manualTargetTotal").textContent =
+              "Still running...";
+            document.getElementById("manualCardsDone").textContent =
+              "1 / 500 cards (0.2%)";
+            document.getElementById("manualTimeRemaining").textContent =
+              "499 cards remaining";
+            document.getElementById("manualLogText").innerHTML =
+              '<b style="color: #f43f5e;">Still going...</b> By hand needs 2 hours 5 minutes.';
+          }
+        }
+
+        benchmarkState.animId = requestAnimationFrame(step);
+      }
+
+      // Auto-start benchmark once on scroll into view
+      let hasAutoStartedBenchmark = false;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && !hasAutoStartedBenchmark) {
+              hasAutoStartedBenchmark = true;
+              triggerBenchmark();
+            }
+          });
+        },
+        { threshold: 0.35 },
+      );
+
+      const benchSection = document.getElementById("benchmark-section");
+      if (benchSection) observer.observe(benchSection);
+    </script>
+  </body>
 </html>
