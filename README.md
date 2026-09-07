@@ -32,7 +32,7 @@ Since this extension is 100% free and open-source, you can install it in less th
 ### Step 1: Download the Code
 1. Click the green **Code** button at the top of this repository and select **Download ZIP** (or clone via git):
    ```bash
-   git clone https://github.com/YOUR_USERNAME/whop-hunter.git
+   git clone https://github.com/Mujtabahaider-Dev/Whop-Hunter.git
    ```
 2. Extract / unzip the folder onto your computer.
 
