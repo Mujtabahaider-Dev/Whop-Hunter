@@ -652,7 +652,158 @@
       text-align: center;
       font-size: 12.5px;
     }
+  
+    /* Interactive Elements Styling */
+    .calculator-section {
+      padding: 85px 0 90px;
+      border-top: 1px solid rgba(139, 92, 246, 0.15);
+    }
+
+    .calc-card {
+      background: linear-gradient(135deg, rgba(23, 16, 51, 0.75) 0%, rgba(15, 10, 33, 0.9) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      border-radius: 22px;
+      padding: 38px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 36px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 35px rgba(109, 40, 217, 0.2);
+    }
+
+    @media (max-width: 820px) {
+      .calc-card { grid-template-columns: 1fr; }
+    }
+
+    .calc-input-group {
+      margin-bottom: 24px;
+    }
+
+    .calc-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .calc-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #2d1f5e;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .calc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #c084fc;
+      border: 3px solid #090514;
+      box-shadow: 0 0 10px rgba(192, 132, 252, 0.7);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .calc-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .calc-result-box {
+      background: rgba(9, 5, 20, 0.85);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      border-radius: 18px;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .calc-result-number {
+      font-size: 46px;
+      font-weight: 800;
+      color: #4ade80;
+      line-height: 1;
+      margin: 12px 0 6px;
+      letter-spacing: -0.02em;
+    }
+
+    /* Live interactive chips */
+    .filter-interactive-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-interactive-btn {
+      all: unset;
+      cursor: pointer;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(23, 16, 51, 0.8);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+
+    .filter-interactive-btn.active, .filter-interactive-btn:hover {
+      background: #6d28d9;
+      border-color: #a78bfa;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(109, 40, 217, 0.4);
+    }
+
+    /* Accordion FAQ */
+    .faq-item {
+      cursor: pointer;
+      transition: border-color 0.2s;
+      user-select: none;
+    }
+
+    .faq-item:hover {
+      border-color: rgba(139, 92, 246, 0.45);
+    }
+
+    .faq-q {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .faq-chevron {
+      transition: transform 0.25s ease;
+      font-size: 18px;
+      color: var(--accent);
+      flex: none;
+    }
+
+    .faq-item.open .faq-chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq-item p {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, margin-top 0.2s;
+      margin-top: 0;
+    }
+
+    .faq-item.open p {
+      max-height: 200px;
+      margin-top: 10px;
+    }
   </style>
+
 </head>
 <body>
   <div class="glow-orb" style="top: -120px; left: 50%; transform: translateX(-50%);"></div>
@@ -802,7 +953,15 @@
           <span class="filter-match-count">500 campaigns → 23 matches</span>
         </div>
 
-        <div class="chips-grid">
+        
+        <div class="filter-interactive-controls">
+          <span style="font-size: 13px; color: var(--text-muted);">Test Filter Threshold:</span>
+          <button type="button" class="filter-interactive-btn" onclick="applyDemoFilter(1.00, this)">≥ $1.00 / 1k</button>
+          <button type="button" class="filter-interactive-btn active" onclick="applyDemoFilter(1.50, this)">≥ $1.50 / 1k</button>
+          <button type="button" class="filter-interactive-btn" onclick="applyDemoFilter(2.00, this)">≥ $2.00 / 1k</button>
+        </div>
+        <div class="chips-grid" id="demoChipsGrid">
+
           <div class="filter-chip missed">$0.60 / 1K</div>
           <div class="filter-chip missed">$1.20 / 1K</div>
           <div class="filter-chip passed">$2.00 / 1K</div>
@@ -812,6 +971,55 @@
           <div class="filter-chip missed">$0.75 / 1K</div>
           <div class="filter-chip passed">$1.80 / 1K</div>
           <div class="filter-chip missed">$1.10 / 1K</div>
+        </div>
+      </div>
+    </section>
+
+    
+    <!-- Interactive Potential Earnings Calculator -->
+    <section class="calculator-section" id="calculator">
+      <div class="section-tag">Interactive Calculator</div>
+      <h2 class="section-title">Calculate Your Estimated Clipper Payout</h2>
+      <p class="section-desc">
+        See how much you could earn on a Whop campaign based on your views and the campaign's rate.
+      </p>
+
+      <div class="calc-card">
+        <div>
+          <!-- Views slider -->
+          <div class="calc-input-group">
+            <div class="calc-label-row">
+              <span>Expected Video Views:</span>
+              <b id="calcViewsVal" style="color: #c084fc; font-size: 16px;">150,000 views</b>
+            </div>
+            <input type="range" id="calcViewsSlider" class="calc-slider" min="10000" max="1000000" step="10000" value="150000" />
+          </div>
+
+          <!-- CPM slider -->
+          <div class="calc-input-group">
+            <div class="calc-label-row">
+              <span>Campaign CPM Rate (per 1k views):</span>
+              <b id="calcCpmVal" style="color: #c084fc; font-size: 16px;">$2.50 / 1k</b>
+            </div>
+            <input type="range" id="calcCpmSlider" class="calc-slider" min="0.50" max="10.00" step="0.25" value="2.50" />
+          </div>
+
+          <!-- Platform Selector -->
+          <div style="display: flex; gap: 8px; margin-top: 20px;">
+            <span style="font-size: 12.5px; color: var(--text-muted); align-self: center;">Platform:</span>
+            <button type="button" class="filter-interactive-btn active" onclick="setCalcPlatform(this, 'TikTok')">TikTok</button>
+            <button type="button" class="filter-interactive-btn" onclick="setCalcPlatform(this, 'YouTube')">YouTube</button>
+            <button type="button" class="filter-interactive-btn" onclick="setCalcPlatform(this, 'Instagram')">Instagram</button>
+          </div>
+        </div>
+
+        <div class="calc-result-box">
+          <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted);">Estimated Earnings</span>
+          <div class="calc-result-number" id="calcTotal">$375.00</div>
+          <span style="font-size: 13px; color: var(--text-muted);" id="calcSubtext">Based on 150K views at $2.50 / 1k</span>
+          <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(139, 92, 246, 0.2); font-size: 11.5px; color: #a78bfa;">
+            ⚡ Whop Hunter filters out campaigns that pay below this target!
+          </div>
         </div>
       </div>
     </section>
@@ -864,43 +1072,67 @@
       <h2 class="section-title">Frequently Asked Questions</h2>
 
       <div class="faq-grid">
-        <div class="faq-item">
-          <h4>Do I need an account?</h4>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">
+            <h4>Do I need an account?</h4>
+            <span class="faq-chevron">▼</span>
+          </div>
           <p>No. Whop Hunter requires zero login or sign-up. Just install the unpacked extension and it works immediately.</p>
         </div>
 
-        <div class="faq-item">
-          <h4>What counts as a filter run?</h4>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">
+            <h4>What counts as a filter run?</h4>
+            <span class="faq-chevron">▼</span>
+          </div>
           <p>Each time you tune your sliders or filters and click Filter, that's a run. Unlike paid tools that limit you to 5 runs, you get unlimited runs for free.</p>
         </div>
 
-        <div class="faq-item">
-          <h4>What can I filter by?</h4>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">
+            <h4>What can I filter by?</h4>
+            <span class="faq-chevron">▼</span>
+          </div>
           <p>Price per 1k views per platform, budget total, percentage already paid out, views remaining, clipper count, campaign age, and owner verification.</p>
         </div>
 
-        <div class="faq-item">
-          <h4>Where does it work?</h4>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">
+            <h4>Where does it work?</h4>
+            <span class="faq-chevron">▼</span>
+          </div>
           <p>Directly on the official Whop Content Rewards discovery page (whop.com/discover/app/app_QRxsQodZgK1r4D).</p>
         </div>
 
-        <div class="faq-item">
-          <h4>Does it send my browsing anywhere?</h4>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">
+            <h4>Does it send my browsing anywhere?</h4>
+            <span class="faq-chevron">▼</span>
+          </div>
           <p>Never. Whop Hunter runs 100% client-side inside your own browser. No data, telemetry, or browsing history is ever transmitted.</p>
         </div>
 
-        <div class="faq-item">
-          <h4>Is Whop Hunter made by Whop?</h4>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">
+            <h4>Is Whop Hunter made by Whop?</h4>
+            <span class="faq-chevron">▼</span>
+          </div>
           <p>No, Whop Hunter is an independent open-source tool built by creators, for creators. It is not affiliated with or endorsed by Whop.</p>
         </div>
 
-        <div class="faq-item">
-          <h4>Which browsers does it support?</h4>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">
+            <h4>Which browsers does it support?</h4>
+            <span class="faq-chevron">▼</span>
+          </div>
           <p>Any Chromium-based browser: Google Chrome, Brave, Microsoft Edge, Arc, and Opera.</p>
         </div>
 
-        <div class="faq-item">
-          <h4>Still stuck or have questions?</h4>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">
+            <h4>Still stuck or have questions?</h4>
+            <span class="faq-chevron">▼</span>
+          </div>
           <p>Open an issue on GitHub or reach out to us at contact@whophunter.com.</p>
         </div>
       </div>
@@ -940,5 +1172,79 @@
       </div>
     </footer>
   </div>
+
+  <script>
+    // 1. Calculator Logic
+    const viewsSlider = document.getElementById('calcViewsSlider');
+    const cpmSlider = document.getElementById('calcCpmSlider');
+    const viewsVal = document.getElementById('calcViewsVal');
+    const cpmVal = document.getElementById('calcCpmVal');
+    const totalVal = document.getElementById('calcTotal');
+    const subtext = document.getElementById('calcSubtext');
+
+    function updateCalculator() {
+      const views = parseInt(viewsSlider.value, 10);
+      const cpm = parseFloat(cpmSlider.value);
+      const total = (views / 1000) * cpm;
+
+      viewsVal.textContent = views.toLocaleString() + ' views';
+      cpmVal.textContent = '
+</html>
+ + cpm.toFixed(2) + ' / 1k';
+      totalVal.textContent = '
+</html>
+ + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      subtext.textContent = 'Based on ' + (views >= 1000000 ? (views/1000000) + 'M' : (views/1000) + 'K') + ' views at 
+</html>
+ + cpm.toFixed(2) + ' / 1k';
+    }
+
+    if (viewsSlider && cpmSlider) {
+      viewsSlider.addEventListener('input', updateCalculator);
+      cpmSlider.addEventListener('input', updateCalculator);
+    }
+
+    function setCalcPlatform(btn, name) {
+      btn.parentElement.querySelectorAll('.filter-interactive-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // 2. Interactive Filter Chips Demo
+    const demoCards = [0.60, 1.20, 2.00, 2.40, 0.90, 0.40, 0.75, 1.80, 1.10];
+
+    function applyDemoFilter(threshold, btn) {
+      if (btn) {
+        btn.parentElement.querySelectorAll('.filter-interactive-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+      const grid = document.getElementById('demoChipsGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      
+      let matches = 0;
+      demoCards.forEach(rate => {
+        const passed = rate >= threshold;
+        if (passed) matches++;
+        const div = document.createElement('div');
+        div.className = 'filter-chip ' + (passed ? 'passed' : 'missed');
+        div.textContent = '
+</html>
+ + rate.toFixed(2) + ' / 1K';
+        grid.appendChild(div);
+      });
+
+      const countEl = document.querySelector('.filter-match-count');
+      if (countEl) {
+        countEl.textContent = '500 campaigns → ' + Math.round((matches / demoCards.length) * 50) + ' matches';
+      }
+    }
+
+    // Initialize first FAQ item as open
+    document.addEventListener('DOMContentLoaded', () => {
+      const firstFaq = document.querySelector('.faq-item');
+      if (firstFaq) firstFaq.classList.add('open');
+    });
+  </script>
+
 </body>
 </html>
