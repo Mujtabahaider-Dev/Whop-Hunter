@@ -1,0 +1,74 @@
+{
+"update_url": "https://clients2.google.com/service/update2/crx",
+
+  "manifest_version": 3,
+  "name": "Whop Hunter: Content Rewards Campaign Finder",
+  "short_name": "Whop Hunter",
+  "version": "1.0.5",
+  "homepage_url": "https://whophunter.com",
+  "minimum_chrome_version": "110",
+  "description": "Find the best Whop Content Rewards campaigns in one click. Filter by Minimum Payout, Reward Rate per 1000 views, budget, and more.",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://whop.com/*",
+    "https://*.apps.whop.com/*"
+  ],
+  "action": {
+    "default_title": "Whop Hunter",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://whop.com/*"
+      ],
+      "js": [
+        "panel.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://whop.com/discover/app/*",
+        "https://*.apps.whop.com/discover*"
+      ],
+      "js": [
+        "injected.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://whop.com/discover/app/*",
+        "https://*.apps.whop.com/discover*"
+      ],
+      "js": [
+        "scanner.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvKshCRVsdb3S4LP4XWkrkAprl9hrq/OMLb5kq6MIUYThA13fbmLPzJPI4UPPOZ6HMqRYK7Hzlj7s6ng9PLabdZmUmuRKfBWpNzA2woCWIYQFZZje2/jHfsgso0Mk53RBQIItSOJNIramhx0nCAlLZtCnU8HZC6VU4VEUUTnNgcsWW/QKfi/LZf097xvhvj0fp39VyjTgyj1s+ayvYLLfB33QR2AyJRJY4huPwtKKnZknBCLoAU9Qg+suz7Dqdj/6s3yFA1WjVKNPhyzI1TBNZJHYH8o4uRAGjYhXQuUBjhEiByH9l/wGmMdyF9QzAVb9kEvhp5ug53/R6XMgrbPnCwIDAQAB"
+}

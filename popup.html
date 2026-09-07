@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Whop Hunter</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      body {
+        width: 280px;
+        margin: 0;
+        padding: 18px 16px 16px;
+        background: #090514;
+        color: #ffffff;
+        font: 400 13px/1.5 'Plus Jakarta Sans', Inter, -apple-system, system-ui, sans-serif;
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .head img {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        display: block;
+        box-shadow: 0 0 10px rgba(109, 40, 217, 0.4);
+      }
+
+      .head b {
+        font-size: 14px;
+        letter-spacing: -0.01em;
+        color: #ffffff;
+        font-weight: 700;
+      }
+
+      p {
+        margin: 0 0 14px;
+        color: #94a3b8;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      button {
+        all: unset;
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        cursor: pointer;
+        text-align: center;
+        padding: 10px 0;
+        border-radius: 8px;
+        background: #6d28d9;
+        color: #ffffff;
+        font-size: 12.5px;
+        font-weight: 600;
+        box-shadow: 0 2px 10px rgba(109, 40, 217, 0.35);
+        transition: all 0.15s ease;
+      }
+
+      button:hover {
+        background: #7c3aed;
+        box-shadow: 0 4px 14px rgba(109, 40, 217, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <img src="icons/icon48.png" alt="" />
+      <b>Whop Hunter</b>
+    </div>
+    <p>Whop Hunter finds and filters the best Content Rewards campaigns on Whop. Open Content Rewards, then click this icon to view the panel.</p>
+    <button id="open" type="button">Open Content Rewards</button>
+    <script src="popup.js"></script>
+  </body>
+</html>

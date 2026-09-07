@@ -1,0 +1,1 @@
+"use strict";(()=>{var e="/discover/app/app_QRxsQodZgK1r4D",t=`https://whop.com${e}`;var o="whophunter";var r=`data-${o}-cid`,s=`data-${o}-hide`,c=`data-${o}-pill`,p=`${o}-style`,_=`${o}:page`,n=`${o}:stamp`,E=`${o}:loadmore`,T=`${o}:hookready`,R=`${o}:hookping`;document.getElementById("open")?.addEventListener("click",()=>{chrome.tabs.create({url:t}),window.close()});})();
