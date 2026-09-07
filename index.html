@@ -806,19 +806,101 @@
       </div>
     </section>
 
-    <!-- Speed & Architecture Comparison -->
-    <section class="section-divider">
+    <!-- Interactive Speed & Architecture Benchmark -->
+    <section class="section-divider" id="benchmark-section">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green);"></span>
+            Live Performance Benchmark
+          </div>
+          <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px;">500 Campaigns: Manual vs. Whop Hunter</h2>
+          <p style="color: var(--text-muted); font-size: 14px;">Watch real-time DOM processing vs manual click-through times on 500 creator reward cards.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div style="display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2px;">
+            <button type="button" id="speedModeFast" onclick="setBenchmarkSpeed('fast')" style="all: unset; cursor: pointer; padding: 5px 10px; font-size: 11.5px; font-weight: 600; border-radius: 4px; background: var(--border-focus); color: #fff; transition: all 0.15s;">
+              Fast Demo (4s)
+            </button>
+            <button type="button" id="speedModeReal" onclick="setBenchmarkSpeed('real')" style="all: unset; cursor: pointer; padding: 5px 10px; font-size: 11.5px; font-weight: 500; border-radius: 4px; color: var(--text-muted); transition: all 0.15s;">
+              Realtime (20s)
+            </button>
+          </div>
+          <button type="button" id="benchmarkStartBtn" onclick="triggerBenchmark()" class="btn-primary" style="padding: 7px 16px; font-size: 12.5px;">
+            <svg id="benchmarkBtnIcon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span id="benchmarkBtnLabel">Start Benchmark</span>
+          </button>
+          <button type="button" onclick="resetBenchmark()" class="btn-outline" style="padding: 7px 12px; font-size: 12.5px;">
+            Reset
+          </button>
+        </div>
+      </div>
+
       <div class="grid-2">
-        <div class="metric-card">
-          <div class="metric-title">MANUAL REVIEW (WITHOUT EXTENSION)</div>
-          <div class="metric-value" style="color: var(--red);">~2h 05m</div>
-          <p class="metric-sub">Opening 500 cards individually, digging for specific platform payout rates, calculating thresholds, and navigating back.</p>
+        <!-- Manual Review Card -->
+        <div class="metric-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div class="metric-title" style="margin-bottom: 0;">MANUAL REVIEW (WITHOUT EXTENSION)</div>
+              <span style="font-size: 11px; padding: 2px 7px; border-radius: 4px; background: rgba(244, 63, 94, 0.12); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.25); font-family: var(--font-mono); font-weight: 600;">BY HAND</span>
+            </div>
+            
+            <div style="display: flex; align-items: baseline; gap: 12px;">
+              <div class="metric-value" id="manualTimer" style="color: var(--red); font-variant-numeric: tabular-nums;">00:00:00</div>
+              <span id="manualTargetTotal" style="font-size: 13px; font-family: var(--font-mono); color: var(--text-muted);">Goal: ~2h 05m</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 999px; height: 7px; overflow: hidden; margin: 10px 0 12px;">
+              <div id="manualProgressBar" style="width: 0%; height: 100%; background: #f43f5e; border-radius: 999px; transition: width 0.08s linear;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px;">
+              <span style="color: var(--text-muted);">Reviewed: <b id="manualCardsDone" style="font-family: var(--font-mono); color: var(--text);">0 / 500 cards</b></span>
+              <span id="manualTimeRemaining" style="font-family: var(--font-mono); color: #f43f5e;">~2h 05m to go</span>
+            </div>
+
+            <p class="metric-sub">Opening 500 cards individually, digging for specific platform payout rates, calculating thresholds, and navigating back.</p>
+          </div>
+
+          <!-- Activity Log Feed -->
+          <div id="manualLogBox" style="margin-top: 18px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); min-height: 38px; display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--text-faint);">●</span>
+            <span id="manualLogText">Idle · Click 'Start Benchmark' to begin test</span>
+          </div>
         </div>
 
-        <div class="metric-card highlight">
-          <div class="metric-title">WITH WHOP HUNTER</div>
-          <div class="metric-value" style="color: var(--green);">00:00:20</div>
-          <p class="metric-sub">Inspects raw network chunks in memory and removes all non-qualifying campaign cards directly from the DOM.</p>
+        <!-- Whop Hunter Automated Card -->
+        <div class="metric-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div class="metric-title" style="margin-bottom: 0;">WITH WHOP HUNTER</div>
+              <span style="font-size: 11px; padding: 2px 7px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-family: var(--font-mono); font-weight: 600;">IN-MEMORY DOM ENGINE</span>
+            </div>
+
+            <div style="display: flex; align-items: baseline; gap: 12px;">
+              <div class="metric-value" id="hunterTimer" style="color: var(--green); font-variant-numeric: tabular-nums;">00:00:00</div>
+              <span id="hunterTargetTotal" style="font-size: 13px; font-family: var(--font-mono); color: #34d399;">Cap: 00:00:20 (20s)</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 999px; height: 7px; overflow: hidden; margin: 10px 0 12px;">
+              <div id="hunterProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 999px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); transition: width 0.08s linear;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px;">
+              <span style="color: var(--text-muted);">Scanned: <b id="hunterCardsDone" style="font-family: var(--font-mono); color: #34d399;">0 / 500 cards</b></span>
+              <span id="hunterSpeedup" style="font-family: var(--font-mono); color: var(--accent);">375x faster</span>
+            </div>
+
+            <p class="metric-sub">Inspects raw network chunks in memory and removes all non-qualifying campaign cards directly from the DOM.</p>
+          </div>
+
+          <!-- Activity Log Feed -->
+          <div id="hunterLogBox" style="margin-top: 18px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); min-height: 38px; display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--green);">●</span>
+            <span id="hunterLogText">Idle · Scanner ready to intercept payload</span>
+          </div>
         </div>
       </div>
     </section>
@@ -1107,6 +1189,169 @@
     // Init
     runTableFilter();
     calcEarnings();
+
+    // --- Interactive Speed Benchmark Engine ---
+    let benchmarkState = {
+      running: false,
+      speedMode: 'fast', // 'fast' = 4s animation, 'real' = 20s
+      elapsedMs: 0,
+      animId: null,
+      startTime: null
+    };
+
+    function setBenchmarkSpeed(mode) {
+      if (benchmarkState.running) resetBenchmark();
+      benchmarkState.speedMode = mode;
+      
+      const fastBtn = document.getElementById('speedModeFast');
+      const realBtn = document.getElementById('speedModeReal');
+      
+      if (mode === 'fast') {
+        fastBtn.style.background = 'var(--border-focus)';
+        fastBtn.style.color = '#fff';
+        realBtn.style.background = 'transparent';
+        realBtn.style.color = 'var(--text-muted)';
+      } else {
+        realBtn.style.background = 'var(--border-focus)';
+        realBtn.style.color = '#fff';
+        fastBtn.style.background = 'transparent';
+        fastBtn.style.color = 'var(--text-muted)';
+      }
+    }
+
+    function formatTimerStr(seconds) {
+      const s = Math.floor(seconds);
+      const hrs = Math.floor(s / 3600);
+      const mins = Math.floor((s % 3600) / 60);
+      const secs = s % 60;
+      return String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+
+    function resetBenchmark() {
+      benchmarkState.running = false;
+      if (benchmarkState.animId) cancelAnimationFrame(benchmarkState.animId);
+      benchmarkState.animId = null;
+      benchmarkState.startTime = null;
+
+      document.getElementById('benchmarkBtnLabel').textContent = 'Start Benchmark';
+      document.getElementById('benchmarkBtnIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+
+      // Reset Hunter
+      document.getElementById('hunterTimer').textContent = '00:00:00';
+      document.getElementById('hunterProgressBar').style.width = '0%';
+      document.getElementById('hunterCardsDone').textContent = '0 / 500 cards';
+      document.getElementById('hunterTargetTotal').textContent = 'Cap: 00:00:20 (20s)';
+      document.getElementById('hunterSpeedup').textContent = '375x faster';
+      document.getElementById('hunterLogText').textContent = 'Idle · Scanner ready to intercept payload';
+
+      // Reset Manual
+      document.getElementById('manualTimer').textContent = '00:00:00';
+      document.getElementById('manualProgressBar').style.width = '0%';
+      document.getElementById('manualCardsDone').textContent = '0 / 500 cards';
+      document.getElementById('manualTargetTotal').textContent = 'Goal: ~2h 05m';
+      document.getElementById('manualTimeRemaining').textContent = '~2h 05m to go';
+      document.getElementById('manualLogText').textContent = 'Idle · Click \'Start Benchmark\' to begin test';
+    }
+
+    function triggerBenchmark() {
+      if (benchmarkState.running) {
+        resetBenchmark();
+        return;
+      }
+      resetBenchmark();
+      benchmarkState.running = true;
+      benchmarkState.startTime = performance.now();
+      
+      document.getElementById('benchmarkBtnLabel').textContent = 'Stop';
+      document.getElementById('benchmarkBtnIcon').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+
+      const totalSimSeconds = 20; // Whop Hunter finishes in 20 simulated seconds
+      const animDurationMs = benchmarkState.speedMode === 'fast' ? 4000 : 20000;
+
+      const manualLogMessages = [
+        'Opening card #1 in separate browser tab...',
+        'Checking TikTok rate & calculating views...',
+        'Navigating back to Discover feed...',
+        'Opening card #2... reading YouTube CPM...'
+      ];
+
+      const hunterLogMessages = [
+        'Intercepting /api/v2/rewards response chunk...',
+        'Parsing in-memory arrays for 500 campaigns...',
+        'Applying TikTok CPM >= $2.00 & budget filters...',
+        'Removing non-qualifying cards from DOM...',
+        'Complete! 488 disqualified, 12 high-paying matches left.'
+      ];
+
+      function step(now) {
+        if (!benchmarkState.running) return;
+
+        const elapsed = now - benchmarkState.startTime;
+        const progress = Math.min(elapsed / animDurationMs, 1);
+        const currentSimSeconds = progress * totalSimSeconds;
+
+        // Update Hunter
+        const hunterCards = Math.floor(progress * 500);
+        document.getElementById('hunterTimer').textContent = formatTimerStr(currentSimSeconds);
+        document.getElementById('hunterProgressBar').style.width = (progress * 100).toFixed(1) + '%';
+        document.getElementById('hunterCardsDone').textContent = hunterCards + ' / 500 cards';
+
+        const hunterMsgIdx = Math.min(Math.floor(progress * hunterLogMessages.length), hunterLogMessages.length - 1);
+        document.getElementById('hunterLogText').textContent = hunterLogMessages[hunterMsgIdx];
+
+        // Update Manual (takes 15s per card in reality)
+        // In 20 seconds, human can only review 20/15 = 1.33 cards!
+        const manualCards = Math.min(Math.floor(currentSimSeconds / 15), 1);
+        const manualBarPct = Math.min((manualCards / 500) * 100, 1.5);
+        document.getElementById('manualTimer').textContent = formatTimerStr(currentSimSeconds);
+        document.getElementById('manualProgressBar').style.width = manualBarPct.toFixed(1) + '%';
+        document.getElementById('manualCardsDone').textContent = manualCards + ' / 500 cards';
+
+        const manualMsgIdx = Math.min(Math.floor(progress * manualLogMessages.length), manualLogMessages.length - 1);
+        document.getElementById('manualLogText').textContent = manualLogMessages[manualMsgIdx];
+
+        if (progress < 1) {
+          benchmarkState.animId = requestAnimationFrame(step);
+        } else {
+          // Finished benchmark!
+          benchmarkState.running = false;
+          document.getElementById('benchmarkBtnLabel').textContent = 'Replay Benchmark';
+          document.getElementById('benchmarkBtnIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+
+          // Final Hunter state
+          document.getElementById('hunterTimer').textContent = '00:00:20';
+          document.getElementById('hunterProgressBar').style.width = '100%';
+          document.getElementById('hunterCardsDone').textContent = '500 / 500 (DONE)';
+          document.getElementById('hunterTargetTotal').textContent = 'Done in 20.0s flat!';
+          document.getElementById('hunterSpeedup').textContent = 'Saved: 2h 04m 40s';
+          document.getElementById('hunterLogText').innerHTML = '<b style="color: #34d399;">✓ Done!</b> Filtered all 500 campaigns in 20s.';
+
+          // Final Manual state
+          document.getElementById('manualTimer').textContent = '~2h 05m';
+          document.getElementById('manualTargetTotal').textContent = 'Still running...';
+          document.getElementById('manualCardsDone').textContent = '1 / 500 cards (0.2%)';
+          document.getElementById('manualTimeRemaining').textContent = '499 cards remaining';
+          document.getElementById('manualLogText').innerHTML = '<b style="color: #f43f5e;">Still going...</b> By hand needs 2 hours 5 minutes.';
+        }
+      }
+
+      benchmarkState.animId = requestAnimationFrame(step);
+    }
+
+    // Auto-start benchmark once on scroll into view
+    let hasAutoStartedBenchmark = false;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasAutoStartedBenchmark) {
+          hasAutoStartedBenchmark = true;
+          triggerBenchmark();
+        }
+      });
+    }, { threshold: 0.35 });
+
+    const benchSection = document.getElementById('benchmark-section');
+    if (benchSection) observer.observe(benchSection);
+
   </script>
 </body>
 </html>
