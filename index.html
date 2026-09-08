@@ -10,6 +10,10 @@
       name="description"
       content="A lightweight Chrome extension that filters Whop Content Rewards by actual platform CPMs, payout thresholds, and budget. Free and open source."
     />
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon16.png" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="128x128" href="icons/icon128.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -136,6 +140,80 @@
       .btn-small:hover {
         background: var(--surface-hover);
         border-color: var(--border-focus);
+      }
+
+      /* Responsive Header & Navigation */
+      .mobile-menu-btn {
+        display: none;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text);
+        padding: 6px 9px;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+
+      .mobile-menu-btn:hover {
+        background: var(--surface-hover);
+        border-color: var(--border-focus);
+      }
+
+      .mobile-nav-drawer {
+        display: none;
+        flex-direction: column;
+        gap: 4px;
+        padding: 14px 24px 18px;
+        background: rgba(14, 16, 20, 0.98);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 16px 32px rgba(0,0,0,0.5);
+      }
+
+      .mobile-nav-drawer.open {
+        display: flex;
+      }
+
+      .mobile-nav-drawer a {
+        color: var(--text-muted);
+        font-size: 13.5px;
+        font-weight: 500;
+        padding: 9px 4px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: color 0.12s;
+      }
+
+      .mobile-nav-drawer a:hover {
+        color: #fff;
+      }
+
+      @media (max-width: 840px) {
+        .nav-links-desktop {
+          display: none !important;
+        }
+        .mobile-menu-btn {
+          display: inline-flex !important;
+        }
+        .nav-items {
+          gap: 10px;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .header-github-btn {
+          display: none !important;
+        }
+        .header-download-btn span {
+          display: none;
+        }
+        .header-download-btn {
+          padding: 6px 10px;
+        }
       }
 
       /* Hero */
@@ -726,23 +804,25 @@
             <span>Whop Hunter</span>
           </a>
           <div class="nav-items">
-            <a href="#how-it-works">How it works</a>
-            <a href="#calculator">Payout Calculator</a>
-            <a href="#installation">Installation</a>
-            <a href="#faq">FAQ</a>
+            <div class="nav-links-desktop" style="display: flex; align-items: center; gap: 20px;">
+              <a href="#how-it-works">How it works</a>
+              <a href="#calculator">Payout Calculator</a>
+              <a href="#installation">Installation</a>
+              <a href="#faq">FAQ</a>
+            </div>
             <a
               href="https://github.com/Mujtabahaider-Dev/Whop-Hunter/archive/refs/heads/main.zip"
-              class="btn-small"
+              class="btn-small header-download-btn"
               download="whop-hunter.zip"
               style="background: var(--primary); color: #fff; border-color: rgba(255,255,255,0.15);"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download (.zip)
+              <span>Download (.zip)</span>
             </a>
             <a
               href="https://github.com/Mujtabahaider-Dev/Whop-Hunter"
               target="_blank"
-              class="btn-small"
+              class="btn-small header-github-btn"
             >
               <svg
                 width="14"
@@ -754,10 +834,32 @@
                   d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
                 />
               </svg>
-              GitHub
+              <span>GitHub</span>
             </a>
+            <button
+              type="button"
+              class="mobile-menu-btn"
+              id="mobileMenuBtn"
+              aria-label="Toggle Navigation Menu"
+              onclick="toggleMobileMenu()"
+            >
+              <svg id="menuIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
           </div>
         </nav>
+      </div>
+      <!-- Mobile Dropdown Menu -->
+      <div class="mobile-nav-drawer" id="mobileNavDrawer">
+        <a href="#how-it-works" onclick="closeMobileMenu()">How it works <span>→</span></a>
+        <a href="#calculator" onclick="closeMobileMenu()">Payout Calculator <span>→</span></a>
+        <a href="#installation" onclick="closeMobileMenu()">Installation <span>→</span></a>
+        <a href="#faq" onclick="closeMobileMenu()">FAQ <span>→</span></a>
+        <a href="https://github.com/Mujtabahaider-Dev/Whop-Hunter" target="_blank" onclick="closeMobileMenu()">View on GitHub <span>↗</span></a>
+        <a href="https://github.com/Mujtabahaider-Dev/Whop-Hunter/archive/refs/heads/main.zip" download="whop-hunter.zip" style="color: var(--accent); font-weight: 600;" onclick="closeMobileMenu()">Download Extension (.zip) <span>↓</span></a>
       </div>
     </header>
 
@@ -1857,7 +1959,36 @@
       runTableFilter();
       calcEarnings();
 
-      // --- Interactive Speed Benchmark Engine ---
+      // Mobile Menu Toggle
+    function toggleMobileMenu() {
+      const drawer = document.getElementById('mobileNavDrawer');
+      const icon = document.getElementById('menuIcon');
+      const isOpen = drawer.classList.toggle('open');
+      if (isOpen) {
+        icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+      } else {
+        icon.innerHTML = '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
+      }
+    }
+
+    function closeMobileMenu() {
+      const drawer = document.getElementById('mobileNavDrawer');
+      const icon = document.getElementById('menuIcon');
+      if (drawer) drawer.classList.remove('open');
+      if (icon) {
+        icon.innerHTML = '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
+      }
+    }
+
+    // Close menu on click outside
+    document.addEventListener('click', function(e) {
+      const header = document.querySelector('.site-header');
+      if (header && !header.contains(e.target)) {
+        closeMobileMenu();
+      }
+    });
+
+    // --- Interactive Speed Benchmark Engine ---
       let benchmarkState = {
         running: false,
         speedMode: "fast", // 'fast' = 4s animation, 'real' = 20s
